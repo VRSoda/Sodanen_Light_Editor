@@ -2,10 +2,7 @@
     "name": "Sodanen VPM Packages",
     "id": "com.sodanen.vpm",
     "url": "https://vrsoda.github.io/Sodanen_Light_Editor/index.json",
-    "author": {
-        "name": "Sodanen",
-        "url": "https://github.com/VRSoda"
-    },
+    "author": "Sodanen",
     "packages": {
         "com.sodanen.sodanenlighteditor": {
             "versions": {
@@ -13,28 +10,11 @@
                     "name": "com.sodanen.sodanenlighteditor",
                     "displayName": "SodanenLightEditor",
                     "version": "1.0.0",
-                    "author": {
-                        "name": "Sodanen",
-                        "url": "https://github.com/VRSoda"
-                    },
                     "unity": "2022.3",
                     "description": "Sodanen Light Editor for VRChat Avatars.",
                     "url": "https://github.com/VRSoda/Sodanen_Light_Editor/releases/download/1.0.0/com.sodanen.sodanenlighteditor-1.0.0.zip",
                     "vpmDependencies": {
                         "com.vrchat.avatars": ">=3.5.0"
-                    },
-                    "legacyFolders": {},
-                    "keywords": [
-                        "vrchat",
-                        "avatar",
-                        "light",
-                        "brightness",
-                        "editor"
-                    ],
-                    "license": "MIT",
-                    "repository": {
-                        "type": "git",
-                        "url": "https://github.com/VRSoda/Sodanen_Light_Editor.git"
                     }
                 }
             }
