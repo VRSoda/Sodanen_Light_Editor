@@ -5,26 +5,37 @@ namespace Brightness.Utility
 {
     public partial class SodanenEditor
     {
+        #region Fields - Unify
+
         private Material _sourceMaterial;
+
+        #endregion
+
+        #region Section - Unify Content
 
         private void DrawUnifySectionContent()
         {
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            DrawUnifyHeader();
-
-            if (_showUnifySection)
             {
-                GUILayout.Space(5);
-                DrawLightSettings();
-                GUILayout.Space(5);
-                DrawShadowSettings();
-                GUILayout.Space(5);
-                DrawShadowGroupSection();
-                GUILayout.Space(8);
-                DrawUnifyButtons();
-                DrawMaterialDifferences();
+                DrawUnifyHeader();
 
-                EditorGUILayout.LabelField("적용 전에 마테리얼 초기값이 동일한지 확인", _infoStyle);
+                if (_showUnifySection)
+                {
+                    GUILayout.Space(4);
+                    DrawLightSettings();
+
+                    GUILayout.Space(4);
+                    DrawShadowSettings();
+
+                    GUILayout.Space(4);
+                    DrawShadowGroupSection();
+
+                    GUILayout.Space(6);
+                    DrawUnifyButtons();
+                    DrawMaterialDifferences();
+
+                    EditorGUILayout.LabelField("적용 전에 마테리얼 초기값이 동일한지 확인", SodanenEditorUI.InfoStyle);
+                }
             }
             EditorGUILayout.EndVertical();
         }
@@ -32,26 +43,26 @@ namespace Brightness.Utility
         private void DrawUnifyHeader()
         {
             _showUnifySection = EditorGUILayout.Foldout(_showUnifySection, "마테리얼 속성 통일", true);
-            DrawSourceMaterialSection();
+            DrawSourceMaterialField();
         }
 
-        private void DrawSourceMaterialSection()
+        private void DrawSourceMaterialField()
         {
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("마테리얼에서 가져오기", GUILayout.Width(120));
-            var newMaterial = (Material)EditorGUILayout.ObjectField(_sourceMaterial, typeof(Material), false);
 
+            var newMaterial = (Material)EditorGUILayout.ObjectField(_sourceMaterial, typeof(Material), false);
             if (newMaterial != _sourceMaterial)
             {
                 _sourceMaterial = newMaterial;
                 if (_sourceMaterial != null)
-                {
                     ApplyMaterialToUnifySettings(_sourceMaterial);
-                }
             }
 
             EditorGUILayout.EndHorizontal();
         }
+
+        #endregion
 
         private void ApplyMaterialToUnifySettings(Material material)
         {
@@ -63,7 +74,7 @@ namespace Brightness.Utility
             if (material.HasProperty(BrightnessConstants.ShaderProperties.LIGHT_MAX_LIMIT))
                 _unifySettings.MaxLightValue = material.GetFloat(BrightnessConstants.ShaderProperties.LIGHT_MAX_LIMIT);
             if (material.HasProperty(BrightnessConstants.ShaderProperties.BACKLIGHT_BORDER))
-                _unifySettings.BackLightValue = material.GetFloat(BrightnessConstants.ShaderProperties.BACKLIGHT_BORDER);
+                _unifySettings.BackLightValue = 1f - material.GetFloat(BrightnessConstants.ShaderProperties.BACKLIGHT_BORDER);
 
             // Shadow Master
             if (material.HasProperty(BrightnessConstants.ShaderProperties.SHADOW_STRENGTH))
@@ -241,10 +252,9 @@ namespace Brightness.Utility
 
         private void DrawUnifyButtons()
         {
-            EditorGUILayout.BeginHorizontal();
-
-            GUI.backgroundColor = new Color(1f, 0.7f, 0.3f);
-            if (GUILayout.Button("수치 다른 마테리얼 찾기", GUILayout.Height(30)))
+            // 파괴적 수정 버튼
+            SodanenEditorUI.BeginButtonRow();
+            if (SodanenEditorUI.DrawButton("수정 전 수치 비교", SodanenEditorUI.ButtonOrange))
             {
                 var excludeMaterials = GetExcludedMaterials();
                 _materialDifferences = MaterialUnifyHelper.FindDifferentMaterials(_targetAvatar, _unifySettings, excludeMaterials);
@@ -255,11 +265,10 @@ namespace Brightness.Utility
                 }
             }
 
-            GUI.backgroundColor = new Color(0.3f, 0.6f, 1f);
-            if (GUILayout.Button("마테리얼 속성 통일하기", GUILayout.Height(30)))
+            if (SodanenEditorUI.DrawButton("마테리얼 적용", SodanenEditorUI.ButtonBlue))
             {
                 if (EditorUtility.DisplayDialog("마테리얼 통일",
-                    "선택된 속성값을 모든 lilToon 마테리얼에 적용합니다.\n이 작업은 되돌릴 수 없습니다.\n\n계속하시겠습니까?",
+                    "선택된 속성값을 모든 lilToon 마테리얼에 적용합니다.\n이 작업은 되돌릴 수 없습니다.",
                     "적용", "취소"))
                 {
                     var excludeMaterials = GetExcludedMaterials();
@@ -270,9 +279,70 @@ namespace Brightness.Utility
                     EditorUtility.DisplayDialog("완료", "마테리얼 속성이 통일되었습니다.", "확인");
                 }
             }
+            SodanenEditorUI.EndButtonRow();
 
-            GUI.backgroundColor = Color.white;
-            EditorGUILayout.EndHorizontal();
+            GUILayout.Space(6);
+
+            // 비파괴적 복제 버튼
+            DrawNonDestructiveButtons();
+        }
+
+        private void DrawNonDestructiveButtons()
+        {
+            SodanenEditorUI.DrawSubSection("비파괴 모드", "아바타와 마테리얼을 복제합니다. 원본은 변경되지 않습니다.", () =>
+            {
+                SodanenEditorUI.BeginButtonRow();
+
+                if (SodanenEditorUI.DrawButton("복제만", SodanenEditorUI.ButtonGreen))
+                {
+                    if (EditorUtility.DisplayDialog("아바타 복제",
+                        "아바타와 모든 lilToon 마테리얼을 복제합니다.\n\n• 복제된 아바타 생성\n• 마테리얼 새 폴더에 저장\n• 원본 아바타 비활성화",
+                        "복제", "취소"))
+                    {
+                        ExecuteNonDestructiveDuplicate(applyUnify: false);
+                    }
+                }
+
+                if (SodanenEditorUI.DrawButton("복제 + 통일", SodanenEditorUI.ButtonBlue))
+                {
+                    if (EditorUtility.DisplayDialog("아바타 복제 및 속성 통일",
+                        "아바타와 마테리얼을 복제하고 속성을 적용합니다.\n\n• 복제된 아바타 생성\n• 마테리얼에 속성 통일\n• 원본 아바타 비활성화",
+                        "복제 및 통일", "취소"))
+                    {
+                        ExecuteNonDestructiveDuplicate(applyUnify: true);
+                    }
+                }
+
+                SodanenEditorUI.EndButtonRow();
+            });
+        }
+
+        private void ExecuteNonDestructiveDuplicate(bool applyUnify)
+        {
+            var excludeMaterials = GetExcludedMaterials();
+            var result = MaterialUnifyHelper.DuplicateMaterialsNonDestructive(
+                _targetAvatar,
+                applyUnifySettings: applyUnify,
+                settings: applyUnify ? _unifySettings : null,
+                excludeMaterials: excludeMaterials);
+
+            if (result != null)
+            {
+                _targetAvatar = result.DuplicatedAvatar;
+                RefreshMaterialList();
+
+                if (applyUnify)
+                {
+                    _materialDifferences.Clear();
+                    _showDifferences = false;
+                }
+
+                EditorUtility.DisplayDialog("완료",
+                    $"복제 완료\n\n아바타: {result.DuplicatedAvatar.name}\n마테리얼: {result.MaterialCount}개", "확인");
+
+                Selection.activeGameObject = result.DuplicatedAvatar;
+                EditorGUIUtility.PingObject(result.DuplicatedAvatar);
+            }
         }
 
         private System.Collections.Generic.HashSet<Material> GetExcludedMaterials()

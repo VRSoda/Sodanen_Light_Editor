@@ -1,25 +1,78 @@
+using System;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace Brightness.Utility
 {
     public static class SodanenEditorUI
     {
-        // Colors
-        public static readonly Color HeaderColor = new Color(0.4f, 0.7f, 1f);
-        public static readonly Color AccentColor = new Color(0.3f, 0.8f, 0.5f);
-        public static readonly Color WarningColor = new Color(1f, 0.7f, 0.3f);
-        public static readonly Color DarkBgColor = new Color(0.18f, 0.18f, 0.18f);
-        private static readonly Color s_separatorColor = new Color(0.4f, 0.4f, 0.4f);
+        #region Constants
 
-        // Cached styles
+        private const string CurrentVersion = "1.0.2";
+        private const string GitHubApiUrl = "https://api.github.com/repos/VRSoda/Sodanen_Light_Editor/releases/latest";
+        private const float UpdateCheckInterval = 3600f; // 1시간마다 체크
+
+        #endregion
+
+        #region Update Check State
+
+        private static bool s_updateCheckStarted;
+        private static bool s_updateAvailable;
+        private static string s_latestVersion = "";
+        private static double s_lastCheckTime;
+        private static UnityWebRequest s_webRequest;
+
+        #endregion
+
+        #region Colors
+
+        // Theme - 전문적인 다크 테마
+        public static readonly Color HeaderColor = new(0.6f, 0.75f, 0.9f);
+        public static readonly Color AccentColor = new(0.78f, 0.9f, 1f);
+        public static readonly Color WarningColor = new(0.95f, 0.7f, 0.4f);
+        public static readonly Color SuccessColor = new(0.5f, 0.8f, 0.55f);
+        public static readonly Color SubtleGray = new(0.5f, 0.5f, 0.5f);
+        public static readonly Color DarkBgColor = new(0.15f, 0.15f, 0.15f);
+
+        // Buttons (무채색)
+        public static readonly Color ButtonDefault = new(0.38f, 0.38f, 0.38f);
+        public static readonly Color ButtonGreen = new(0.42f, 0.42f, 0.42f);
+        public static readonly Color ButtonBlue = new(0.4f, 0.4f, 0.4f);
+        public static readonly Color ButtonOrange = new(0.44f, 0.44f, 0.44f);
+        public static readonly Color ButtonRed = new(0.36f, 0.36f, 0.36f);
+
+        // Internal
+        private static readonly Color SeparatorLight = new(0.32f, 0.32f, 0.32f);
+        private static readonly Color SeparatorDark = new(0.18f, 0.18f, 0.18f);
+        private static readonly Color BoxBgColor = new(0.2f, 0.2f, 0.2f);
+        private static readonly Color BoxBorderColor = new(0.12f, 0.12f, 0.12f);
+        private static readonly Color TextBright = new(0.88f, 0.88f, 0.88f);
+        private static readonly Color TextMedium = new(0.65f, 0.65f, 0.65f);
+        private static readonly Color TextDim = new(0.45f, 0.45f, 0.45f);
+
+        #endregion
+
+        #region Cached Styles
+
         private static GUIStyle s_titleStyle;
         private static GUIStyle s_subtitleStyle;
         private static GUIStyle s_sectionTitleStyle;
         private static GUIStyle s_boxStyle;
+        private static GUIStyle s_innerBoxStyle;
         private static GUIStyle s_groupStyle;
         private static GUIStyle s_statusStyle;
+        private static GUIStyle s_buttonStyle;
+        private static GUIStyle s_smallButtonStyle;
+        private static GUIStyle s_infoStyle;
+        private static GUIStyle s_subHeaderStyle;
+        private static GUIStyle s_versionStyle;
+        private static Texture2D s_boxBgTexture;
         private static Color s_lastStatusColor;
+
+        #endregion
+
+        #region Drawing - Background & Header
 
         public static void DrawBackground(Rect position)
         {
@@ -28,43 +81,133 @@ namespace Brightness.Utility
 
         public static void DrawHeader()
         {
-            s_titleStyle ??= new GUIStyle(EditorStyles.boldLabel) { fontSize = 20, alignment = TextAnchor.MiddleLeft, normal = { textColor = HeaderColor } };
-            s_subtitleStyle ??= new GUIStyle(EditorStyles.label) { fontSize = 11, alignment = TextAnchor.MiddleLeft, normal = { textColor = Color.gray } };
+            s_titleStyle ??= new GUIStyle(EditorStyles.boldLabel)
+            {
+                fontSize = 14,
+                alignment = TextAnchor.MiddleLeft,
+                padding = new RectOffset(4, 0, 0, 0),
+                margin = new RectOffset(0, 0, 0, 0),
+                normal = { textColor = TextBright }
+            };
+            s_subtitleStyle ??= new GUIStyle(EditorStyles.label)
+            {
+                fontSize = 9,
+                alignment = TextAnchor.MiddleLeft,
+                padding = new RectOffset(5, 0, 0, 0),
+                normal = { textColor = TextDim }
+            };
+            s_versionStyle ??= new GUIStyle(EditorStyles.miniLabel)
+            {
+                fontSize = 9,
+                alignment = TextAnchor.MiddleRight,
+                normal = { textColor = TextDim }
+            };
 
+            // Header
             EditorGUILayout.BeginVertical();
-            EditorGUILayout.LabelField("SODANEN", s_titleStyle);
-            EditorGUILayout.LabelField("밝기 조절 에디터", s_subtitleStyle);
-            GUILayout.Space(8);
-            DrawSeparator(HeaderColor, 2);
+            {
+                GUILayout.Space(4);
+                EditorGUILayout.BeginHorizontal();
+                {
+                    EditorGUILayout.LabelField("Sodanen Light Editor", s_titleStyle);
+                    GUILayout.FlexibleSpace();
+                    EditorGUILayout.LabelField("Discord : Sodanen", s_versionStyle, GUILayout.Width(110));
+                }
+                EditorGUILayout.EndHorizontal();
+
+                // 업데이트 체크 시작
+                CheckForUpdates();
+
+                // 버전 표시 (업데이트 있을 때만 알림 추가)
+                if (s_updateAvailable)
+                {
+                    EditorGUILayout.BeginHorizontal();
+                    {
+                        EditorGUILayout.LabelField($"v{CurrentVersion}", s_subtitleStyle, GUILayout.Width(40));
+
+                        var updateStyle = new GUIStyle(EditorStyles.miniLabel)
+                        {
+                            fontSize = 9,
+                            normal = { textColor = WarningColor }
+                        };
+                        EditorGUILayout.LabelField($"→ v{s_latestVersion} 업데이트 가능 (VCC 확인)", updateStyle);
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                else
+                {
+                    EditorGUILayout.LabelField($"v{CurrentVersion}", s_subtitleStyle);
+                }
+                GUILayout.Space(4);
+            }
             EditorGUILayout.EndVertical();
+
+            // Bottom separator (AccentColor)
+            var separatorRect = EditorGUILayout.GetControlRect(false, 1);
+            EditorGUI.DrawRect(separatorRect, AccentColor);
         }
+
+        public static void DrawSeparator(Color color, int height = 1)
+        {
+            GUILayout.Space(4);
+            var rect = EditorGUILayout.GetControlRect(false, height);
+            EditorGUI.DrawRect(rect, color);
+            GUILayout.Space(4);
+        }
+
+        public static void DrawThinSeparator()
+        {
+            GUILayout.Space(2);
+            var rect = EditorGUILayout.GetControlRect(false, 1);
+            EditorGUI.DrawRect(rect, SeparatorDark);
+            GUILayout.Space(2);
+        }
+
+        public static void Space(float pixels = 6) => GUILayout.Space(pixels);
+
+        #endregion
+
+        #region Drawing - Sections & Boxes
 
         public static void DrawSectionBox(string title, System.Action content)
         {
-            s_sectionTitleStyle ??= new GUIStyle(EditorStyles.boldLabel) { fontSize = 11, normal = { textColor = Color.white } };
-            
-            EditorGUILayout.BeginVertical(GetBoxStyle());
-            EditorGUILayout.LabelField(title, s_sectionTitleStyle);
-            DrawSeparator(s_separatorColor, 1);
-            content?.Invoke();
-            GUILayout.Space(5);
+            s_sectionTitleStyle ??= new GUIStyle(EditorStyles.label)
+            {
+                fontSize = 10,
+                fontStyle = FontStyle.Bold,
+                padding = new RectOffset(0, 0, 0, 0),
+                normal = { textColor = TextBright }
+            };
+
+            EditorGUILayout.BeginVertical(BoxStyle);
+            {
+                // Section header
+                EditorGUILayout.LabelField(title.ToUpper(), s_sectionTitleStyle);
+                DrawThinSeparator();
+                content?.Invoke();
+            }
             EditorGUILayout.EndVertical();
         }
 
-        public static GUIStyle GetBoxStyle()
+        public static void DrawSubSection(string title, string description, System.Action content)
         {
-            s_boxStyle ??= new GUIStyle(EditorStyles.helpBox)
+            EditorGUILayout.BeginVertical(InnerBoxStyle);
             {
-                padding = new RectOffset(12, 12, 8, 8),
-                margin = new RectOffset(5, 5, 3, 3)
-            };
-            return s_boxStyle;
-        }
+                if (!string.IsNullOrEmpty(title))
+                {
+                    EditorGUILayout.LabelField(title, SubHeaderStyle);
+                    GUILayout.Space(2);
+                }
 
-        public static void DrawSeparator(Color color, int height)
-        {
-            var rect = EditorGUILayout.GetControlRect(false, height);
-            EditorGUI.DrawRect(rect, color);
+                if (!string.IsNullOrEmpty(description))
+                {
+                    EditorGUILayout.LabelField(description, InfoStyle);
+                    GUILayout.Space(4);
+                }
+
+                content?.Invoke();
+            }
+            EditorGUILayout.EndVertical();
         }
 
         public static void DrawStatusBox(string message, Color color)
@@ -75,6 +218,8 @@ namespace Brightness.Utility
                 {
                     alignment = TextAnchor.MiddleCenter,
                     fontSize = 10,
+                    fontStyle = FontStyle.Normal,
+                    padding = new RectOffset(10, 10, 8, 8),
                     normal = { textColor = color }
                 };
                 s_lastStatusColor = color;
@@ -84,8 +229,203 @@ namespace Brightness.Utility
 
         public static void DrawGroupLabel(string groupName)
         {
-            s_groupStyle ??= new GUIStyle(EditorStyles.miniLabel) { fontStyle = FontStyle.Bold, normal = { textColor = HeaderColor } };
-            EditorGUILayout.LabelField(groupName, s_groupStyle);
+            s_groupStyle ??= new GUIStyle(EditorStyles.miniLabel)
+            {
+                fontSize = 9,
+                fontStyle = FontStyle.Bold,
+                padding = new RectOffset(0, 0, 4, 2),
+                normal = { textColor = HeaderColor }
+            };
+
+            EditorGUILayout.BeginHorizontal();
+            {
+                EditorGUILayout.LabelField(groupName.ToUpper(), s_groupStyle);
+                GUILayout.FlexibleSpace();
+
+                // Decorative line
+                var lineRect = GUILayoutUtility.GetRect(60, 1);
+                lineRect.y += 8;
+                EditorGUI.DrawRect(lineRect, SeparatorDark);
+
+                GUILayout.Space(4);
+            }
+            EditorGUILayout.EndHorizontal();
         }
+
+        #endregion
+
+        #region Drawing - Buttons
+
+        public static bool DrawButton(string text, Color bgColor, float height = 28f)
+        {
+            var prevColor = GUI.backgroundColor;
+            GUI.backgroundColor = bgColor;
+
+            var style = height > 24 ? ButtonStyle : SmallButtonStyle;
+            var originalHeight = style.fixedHeight;
+            style.fixedHeight = height;
+
+            bool clicked = GUILayout.Button(text, style);
+
+            style.fixedHeight = originalHeight;
+            GUI.backgroundColor = prevColor;
+            return clicked;
+        }
+
+        public static void BeginButtonRow() => EditorGUILayout.BeginHorizontal();
+        public static void EndButtonRow() => EditorGUILayout.EndHorizontal();
+
+        #endregion
+
+        #region Style Properties
+
+        private static Texture2D BoxBgTexture
+        {
+            get
+            {
+                if (s_boxBgTexture == null)
+                {
+                    s_boxBgTexture = new Texture2D(1, 1);
+                    s_boxBgTexture.SetPixel(0, 0, BoxBgColor);
+                    s_boxBgTexture.Apply();
+                }
+                return s_boxBgTexture;
+            }
+        }
+
+        public static GUIStyle BoxStyle => s_boxStyle ??= new GUIStyle(EditorStyles.helpBox)
+        {
+            padding = new RectOffset(14, 14, 10, 12),
+            margin = new RectOffset(0, 0, 2, 2),
+            normal = { background = BoxBgTexture }
+        };
+
+        public static GUIStyle InnerBoxStyle => s_innerBoxStyle ??= new GUIStyle(EditorStyles.helpBox)
+        {
+            padding = new RectOffset(12, 12, 10, 10),
+            margin = new RectOffset(0, 0, 4, 4)
+        };
+
+        public static GUIStyle ButtonStyle => s_buttonStyle ??= new GUIStyle(GUI.skin.button)
+        {
+            fontSize = 10,
+            fontStyle = FontStyle.Bold,
+            fixedHeight = 26,
+            padding = new RectOffset(14, 14, 4, 4),
+            margin = new RectOffset(0, 0, 2, 2)
+        };
+
+        public static GUIStyle SmallButtonStyle => s_smallButtonStyle ??= new GUIStyle(GUI.skin.button)
+        {
+            fontSize = 9,
+            fixedHeight = 20,
+            padding = new RectOffset(10, 10, 2, 2),
+            margin = new RectOffset(0, 0, 1, 1)
+        };
+
+        public static GUIStyle InfoStyle => s_infoStyle ??= new GUIStyle(EditorStyles.miniLabel)
+        {
+            wordWrap = true,
+            fontSize = 9,
+            padding = new RectOffset(0, 0, 0, 0),
+            normal = { textColor = TextDim }
+        };
+
+        public static GUIStyle SubHeaderStyle => s_subHeaderStyle ??= new GUIStyle(EditorStyles.boldLabel)
+        {
+            fontSize = 10,
+            padding = new RectOffset(0, 0, 0, 0),
+            normal = { textColor = TextMedium }
+        };
+
+        // Legacy
+        public static GUIStyle GetBoxStyle() => BoxStyle;
+        public static GUIStyle GetButtonStyle() => ButtonStyle;
+        public static GUIStyle GetSmallButtonStyle() => SmallButtonStyle;
+        public static GUIStyle GetInfoStyle() => InfoStyle;
+        public static GUIStyle GetSubHeaderStyle() => SubHeaderStyle;
+
+        #endregion
+
+        #region Update Check
+
+        private static void CheckForUpdates()
+        {
+            // 이미 체크 중이거나 간격이 안 지났으면 스킵
+            if (s_updateCheckStarted && EditorApplication.timeSinceStartup - s_lastCheckTime < UpdateCheckInterval)
+            {
+                // 진행 중인 요청 처리
+                ProcessWebRequest();
+                return;
+            }
+
+            // 새 요청 시작
+            s_lastCheckTime = EditorApplication.timeSinceStartup;
+            s_updateCheckStarted = true;
+
+            s_webRequest = UnityWebRequest.Get(GitHubApiUrl);
+            s_webRequest.SetRequestHeader("User-Agent", "Unity");
+            s_webRequest.SendWebRequest();
+        }
+
+        private static void ProcessWebRequest()
+        {
+            if (s_webRequest == null || !s_webRequest.isDone) return;
+
+            if (s_webRequest.result == UnityWebRequest.Result.Success)
+            {
+                try
+                {
+                    var json = s_webRequest.downloadHandler.text;
+                    s_latestVersion = ParseVersionFromJson(json);
+
+                    if (!string.IsNullOrEmpty(s_latestVersion))
+                    {
+                        s_updateAvailable = CompareVersions(s_latestVersion, CurrentVersion) > 0;
+                    }
+                }
+                catch (Exception)
+                {
+                    s_updateAvailable = false;
+                }
+            }
+
+            s_webRequest.Dispose();
+            s_webRequest = null;
+        }
+
+        private static string ParseVersionFromJson(string json)
+        {
+            // "tag_name":"v1.0.3" 또는 "tag_name":"1.0.3" 형식 파싱
+            const string tagKey = "\"tag_name\":\"";
+            int startIndex = json.IndexOf(tagKey, StringComparison.Ordinal);
+            if (startIndex < 0) return "";
+
+            startIndex += tagKey.Length;
+            int endIndex = json.IndexOf("\"", startIndex, StringComparison.Ordinal);
+            if (endIndex < 0) return "";
+
+            var version = json.Substring(startIndex, endIndex - startIndex);
+            return version.TrimStart('v', 'V');
+        }
+
+        private static int CompareVersions(string v1, string v2)
+        {
+            var parts1 = v1.Split('.');
+            var parts2 = v2.Split('.');
+            int maxLength = Math.Max(parts1.Length, parts2.Length);
+
+            for (int i = 0; i < maxLength; i++)
+            {
+                int num1 = i < parts1.Length && int.TryParse(parts1[i], out int n1) ? n1 : 0;
+                int num2 = i < parts2.Length && int.TryParse(parts2[i], out int n2) ? n2 : 0;
+
+                if (num1 > num2) return 1;
+                if (num1 < num2) return -1;
+            }
+            return 0;
+        }
+
+        #endregion
     }
 }

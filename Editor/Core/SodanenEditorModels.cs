@@ -63,8 +63,8 @@ namespace Brightness.Utility
     {
         public bool ShowShadowMaster { get; set; } = true;
         public bool ShowShadow1st { get; set; } = true;
-        public bool ShowShadow2nd { get; set; }
-        public bool ShowShadow3rd { get; set; }
+        public bool ShowShadow2nd { get; set; } = true;
+        public bool ShowShadow3rd { get; set; } = true;
         public bool ShowShadowBlurMask { get; set; }
         public bool ShowShadowGroup { get; set; } = true;
     }

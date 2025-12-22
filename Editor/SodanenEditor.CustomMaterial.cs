@@ -14,7 +14,7 @@ namespace Brightness.Utility
             {
                 if (_customMaterialEntries.Count == 0)
                 {
-                    EditorGUILayout.LabelField("+ 버튼으로 마테리얼을 추가하세요", _infoStyle);
+                    EditorGUILayout.LabelField("+ 버튼으로 마테리얼을 추가하세요", SodanenEditorUI.InfoStyle);
                 }
                 else
                 {
@@ -22,7 +22,7 @@ namespace Brightness.Utility
                     DrawCustomMaterialList();
 
                     GUILayout.Space(5);
-                    EditorGUILayout.LabelField("이 마테리얼들은 '마테리얼 속성 통일'에서 제외됩니다", _infoStyle);
+                    EditorGUILayout.LabelField("이 마테리얼들은 '마테리얼 속성 통일'에서 제외됩니다", SodanenEditorUI.InfoStyle);
                 }
             }
             EditorGUILayout.EndVertical();

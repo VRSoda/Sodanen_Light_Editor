@@ -9,8 +9,30 @@ namespace Brightness.Utility
 {
     public static class PresetManager
     {
-        private const string PRESET_FOLDER = "Assets/BRIGHTNESS_CONTROL/Presets";
         private const string PRESET_EXTENSION = ".json";
+
+        private static string GetPresetFolder()
+        {
+            // 패키지 내부 Presets 폴더 경로 찾기
+            var guids = AssetDatabase.FindAssets("t:Folder Presets");
+            foreach (var guid in guids)
+            {
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                if (path.Contains("com.sodanen.sodanenlighteditor") || path.Contains("SodanenLightEditor"))
+                {
+                    return path;
+                }
+            }
+
+            // Packages 폴더에서 찾기
+            var packagePath = "Packages/com.sodanen.sodanenlighteditor/Presets";
+            if (Directory.Exists(packagePath))
+            {
+                return packagePath;
+            }
+
+            return "Assets/Presets";
+        }
 
         private static List<BrightnessPreset> _cache;
 
@@ -23,9 +45,10 @@ namespace Brightness.Utility
         public static void SavePreset(BrightnessPreset preset)
         {
             LoadIfNeeded();
-            EnsurePresetFolder();
+            var presetFolder = GetPresetFolder();
+            EnsurePresetFolder(presetFolder);
 
-            var filePath = GetPresetFilePath(preset.Name);
+            var filePath = GetPresetFilePath(preset.Name, presetFolder);
             var json = JsonUtility.ToJson(preset, true);
             File.WriteAllText(filePath, json);
 
@@ -46,8 +69,9 @@ namespace Brightness.Utility
         public static void DeletePreset(string presetName)
         {
             LoadIfNeeded();
+            var presetFolder = GetPresetFolder();
 
-            var filePath = GetPresetFilePath(presetName);
+            var filePath = GetPresetFilePath(presetName, presetFolder);
             if (File.Exists(filePath))
             {
                 File.Delete(filePath);
@@ -66,12 +90,13 @@ namespace Brightness.Utility
         public static void RenamePreset(string oldName, string newName)
         {
             LoadIfNeeded();
+            var presetFolder = GetPresetFolder();
 
             var preset = _cache.Find(p => p.Name == oldName);
             if (preset == null) return;
 
-            var oldPath = GetPresetFilePath(oldName);
-            var newPath = GetPresetFilePath(newName);
+            var oldPath = GetPresetFilePath(oldName, presetFolder);
+            var newPath = GetPresetFilePath(newName, presetFolder);
 
             if (File.Exists(oldPath))
             {
@@ -130,77 +155,15 @@ namespace Brightness.Utility
             return preset;
         }
 
-        public static void CreateDefaultPresets()
-        {
-            LoadIfNeeded();
-
-            if (_cache.Count > 0) return;
-
-            var defaultPresets = new List<BrightnessPreset>
-            {
-                new BrightnessPreset("기본값")
-                {
-                    Description = "lilToon 기본 설정",
-                    MinLightValue = 0.05f,
-                    MaxLightValue = 1.0f,
-                    BackLightValue = 0.35f,
-                    ShadowStrengthValue = 1.0f,
-                    Shadow1stColorValue = new Color32(0xD3, 0xEC, 0xFF, 0xFF),
-                    Shadow1stBorderValue = 0.5f,
-                    Shadow1stBlurValue = 0.17f
-                },
-                new BrightnessPreset("밝은 환경")
-                {
-                    Description = "밝은 월드용 설정",
-                    MinLightValue = 0.1f,
-                    MaxLightValue = 1.2f,
-                    BackLightValue = 0.2f,
-                    ShadowStrengthValue = 0.7f,
-                    Shadow1stColorValue = new Color32(0xE8, 0xF4, 0xFF, 0xFF),
-                    Shadow1stBorderValue = 0.6f,
-                    Shadow1stBlurValue = 0.25f
-                },
-                new BrightnessPreset("어두운 환경")
-                {
-                    Description = "어두운 월드/클럽용 설정",
-                    MinLightValue = 0.15f,
-                    MaxLightValue = 0.9f,
-                    BackLightValue = 0.5f,
-                    ShadowStrengthValue = 0.5f,
-                    Shadow1stColorValue = new Color32(0xC0, 0xD8, 0xF0, 0xFF),
-                    Shadow1stBorderValue = 0.4f,
-                    Shadow1stBlurValue = 0.3f
-                },
-                new BrightnessPreset("소프트 그림자")
-                {
-                    Description = "부드러운 그림자 설정",
-                    MinLightValue = 0.08f,
-                    MaxLightValue = 1.0f,
-                    BackLightValue = 0.3f,
-                    ShadowStrengthValue = 0.8f,
-                    Shadow1stColorValue = new Color32(0xE0, 0xEE, 0xFF, 0xFF),
-                    Shadow1stBorderValue = 0.45f,
-                    Shadow1stBlurValue = 0.4f,
-                    Shadow2ndBlurValue = 0.8f
-                }
-            };
-
-            foreach (var preset in defaultPresets)
-            {
-                SavePreset(preset);
-            }
-
-            Debug.Log("[PresetManager] 기본 프리셋 생성됨");
-        }
-
         private static void LoadIfNeeded()
         {
             if (_cache != null) return;
 
             _cache = new List<BrightnessPreset>();
-            EnsurePresetFolder();
+            var presetFolder = GetPresetFolder();
+            EnsurePresetFolder(presetFolder);
 
-            var files = Directory.GetFiles(PRESET_FOLDER, "*" + PRESET_EXTENSION);
+            var files = Directory.GetFiles(presetFolder, "*" + PRESET_EXTENSION);
             foreach (var file in files)
             {
                 try
@@ -221,17 +184,17 @@ namespace Brightness.Utility
             _cache = _cache.OrderBy(p => p.Name).ToList();
         }
 
-        private static string GetPresetFilePath(string presetName)
+        private static string GetPresetFilePath(string presetName, string presetFolder)
         {
             var safeName = string.Join("_", presetName.Split(Path.GetInvalidFileNameChars()));
-            return Path.Combine(PRESET_FOLDER, safeName + PRESET_EXTENSION);
+            return Path.Combine(presetFolder, safeName + PRESET_EXTENSION);
         }
 
-        private static void EnsurePresetFolder()
+        private static void EnsurePresetFolder(string presetFolder)
         {
-            if (!Directory.Exists(PRESET_FOLDER))
+            if (!Directory.Exists(presetFolder))
             {
-                Directory.CreateDirectory(PRESET_FOLDER);
+                Directory.CreateDirectory(presetFolder);
             }
         }
 
@@ -239,6 +202,15 @@ namespace Brightness.Utility
         {
             _cache = null;
             LoadIfNeeded();
+        }
+
+        public static void CreateDefaultPresets()
+        {
+            var defaultPreset = new BrightnessPreset("기본 설정")
+            {
+                Description = "lilToon 기본 설정값"
+            };
+            SavePreset(defaultPreset);
         }
     }
 }
