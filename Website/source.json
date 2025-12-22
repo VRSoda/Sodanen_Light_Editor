@@ -1,0 +1,18 @@
+{
+    "name": "Sodanen VPM Packages",
+    "id": "com.sodanen.vpm",
+    "url": "https://vrsoda.github.io/Sodanen_Light_Editor/index.json",
+    "author": {
+        "name": "Sodanen",
+        "url": "https://github.com/VRSoda"
+    },
+    "description": "Sodanen's VRChat Packages",
+    "infoLink": {
+        "text": "GitHub",
+        "url": "https://github.com/VRSoda/Sodanen_Light_Editor"
+    },
+    "bannerUrl": "",
+    "githubRepos": [
+        "VRSoda/Sodanen_Light_Editor"
+    ]
+}
