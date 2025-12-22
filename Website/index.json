@@ -12,10 +12,7 @@
                     "version": "1.0.0",
                     "unity": "2022.3",
                     "description": "Sodanen Light Editor for VRChat Avatars.",
-                    "url": "https://github.com/VRSoda/Sodanen_Light_Editor/releases/download/1.0.0/com.sodanen.sodanenlighteditor-1.0.0.zip",
-                    "vpmDependencies": {
-                        "com.vrchat.avatars": ">=3.5.0"
-                    }
+                    "url": "https://github.com/VRSoda/Sodanen_Light_Editor/releases/download/1.0.0/com.sodanen.sodanenlighteditor-1.0.0.zip"
                 }
             }
         }
