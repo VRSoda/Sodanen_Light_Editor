@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Brightness.Localization;
+using static Brightness.Localization.Loc;
 
 namespace Brightness.Utility
 {
@@ -11,8 +13,8 @@ namespace Brightness.Utility
         {
             new()
             {
-                Label = "Min Light",
-                Tooltip = "어두운 환경에서의 최소 밝기 제한",
+                LabelKey = "feature.minlight",
+                TooltipKey = "feature.minlight.tooltip",
                 IsEnabled = t => t.MinLight,
                 SetEnabled = (t, v) => t.MinLight = v,
                 IsExpanded = s => s.ShowMinLight,
@@ -21,8 +23,8 @@ namespace Brightness.Utility
             },
             new()
             {
-                Label = "Max Light",
-                Tooltip = "밝은 환경에서의 최대 밝기 제한",
+                LabelKey = "feature.maxlight",
+                TooltipKey = "feature.maxlight.tooltip",
                 IsEnabled = t => t.MaxLight,
                 SetEnabled = (t, v) => t.MaxLight = v,
                 IsExpanded = s => s.ShowMaxLight,
@@ -31,8 +33,8 @@ namespace Brightness.Utility
             },
             new()
             {
-                Label = "Back Light",
-                Tooltip = "뒤에서 오는 빛의 강도",
+                LabelKey = "feature.backlight",
+                TooltipKey = "feature.backlight.tooltip",
                 IsEnabled = t => t.BackLight,
                 SetEnabled = (t, v) => t.BackLight = v,
                 IsExpanded = s => s.ShowBackLight,
@@ -45,8 +47,8 @@ namespace Brightness.Utility
         {
             new()
             {
-                Label = "Shadow",
-                Tooltip = "그림자 방향 조절",
+                LabelKey = "feature.shadow_main",
+                TooltipKey = "feature.shadow.tooltip",
                 IsEnabled = t => t.Shadow,
                 SetEnabled = (t, v) => t.Shadow = v,
                 IsExpanded = s => s.ShowShadow,
@@ -55,8 +57,8 @@ namespace Brightness.Utility
             },
             new()
             {
-                Label = "Shadow X",
-                Tooltip = "X축 그림자 방향",
+                LabelKey = "feature.shadow_x",
+                TooltipKey = "feature.shadow_x.tooltip",
                 IsEnabled = t => t.ShadowXAngle,
                 SetEnabled = (t, v) => t.ShadowXAngle = v,
                 IsExpanded = s => s.ShowShadowX,
@@ -65,8 +67,8 @@ namespace Brightness.Utility
             },
             new()
             {
-                Label = "Shadow Y",
-                Tooltip = "Y축 그림자 방향",
+                LabelKey = "feature.shadow_y",
+                TooltipKey = "feature.shadow_y.tooltip",
                 IsEnabled = t => t.ShadowYAngle,
                 SetEnabled = (t, v) => t.ShadowYAngle = v,
                 IsExpanded = s => s.ShowShadowY,
@@ -81,14 +83,14 @@ namespace Brightness.Utility
 
         private void DrawFeatureSection()
         {
-            SodanenEditorUI.DrawSectionBox("기능 선택", () =>
+            SodanenEditorUI.DrawSectionBox(L("feature.title"), () =>
             {
-                SodanenEditorUI.DrawGroupLabel("Light");
+                SodanenEditorUI.DrawGroupLabel(L("feature.light"));
                 DrawFeatureSet(_lightFeatures);
 
                 GUILayout.Space(8);
 
-                SodanenEditorUI.DrawGroupLabel("Shadow");
+                SodanenEditorUI.DrawGroupLabel(L("feature.shadow"));
                 DrawFeatureSet(_shadowFeatures);
             });
         }

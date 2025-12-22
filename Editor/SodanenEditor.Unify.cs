@@ -1,5 +1,8 @@
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using Brightness.Localization;
+using static Brightness.Localization.Loc;
 
 namespace Brightness.Utility
 {
@@ -34,7 +37,7 @@ namespace Brightness.Utility
                     DrawUnifyButtons();
                     DrawMaterialDifferences();
 
-                    EditorGUILayout.LabelField("적용 전에 마테리얼 초기값이 동일한지 확인", SodanenEditorUI.InfoStyle);
+                    EditorGUILayout.LabelField(L("unify.check_before"), SodanenEditorUI.InfoStyle);
                 }
             }
             EditorGUILayout.EndVertical();
@@ -42,14 +45,14 @@ namespace Brightness.Utility
 
         private void DrawUnifyHeader()
         {
-            _showUnifySection = EditorGUILayout.Foldout(_showUnifySection, "마테리얼 속성 통일", true);
+            _showUnifySection = EditorGUILayout.Foldout(_showUnifySection, L("unify.title"), true);
             DrawSourceMaterialField();
         }
 
         private void DrawSourceMaterialField()
         {
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("마테리얼에서 가져오기", GUILayout.Width(120));
+            EditorGUILayout.LabelField(L("unify.source_material"), GUILayout.Width(135));
 
             var newMaterial = (Material)EditorGUILayout.ObjectField(_sourceMaterial, typeof(Material), false);
             if (newMaterial != _sourceMaterial)
@@ -137,11 +140,11 @@ namespace Brightness.Utility
 
         private void DrawLightSettings()
         {
-            EditorGUILayout.LabelField("Light", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField(L("feature.light"), EditorStyles.boldLabel);
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            DrawUnifySlider("Min Light", ref _unifySettings.UnifyMinLight, ref _unifySettings.MinLightValue, 0f, 1f);
-            DrawUnifySlider("Max Light", ref _unifySettings.UnifyMaxLight, ref _unifySettings.MaxLightValue, 0f, 10f);
-            DrawUnifySlider("Back Light", ref _unifySettings.UnifyBackLight, ref _unifySettings.BackLightValue, 0f, 1f);
+            DrawUnifySlider(L("feature.minlight"), ref _unifySettings.UnifyMinLight, ref _unifySettings.MinLightValue, 0f, 1f);
+            DrawUnifySlider(L("feature.maxlight"), ref _unifySettings.UnifyMaxLight, ref _unifySettings.MaxLightValue, 0f, 10f);
+            DrawUnifySlider(L("feature.backlight"), ref _unifySettings.UnifyBackLight, ref _unifySettings.BackLightValue, 0f, 1f);
             EditorGUILayout.EndVertical();
         }
 
@@ -149,7 +152,7 @@ namespace Brightness.Utility
         {
             EditorGUILayout.BeginHorizontal();
             var newEnableGroup = EditorGUILayout.Toggle(_unifyEnableShadowGroup, GUILayout.Width(18));
-            _shadowUIState.ShowShadowGroup = EditorGUILayout.Foldout(_shadowUIState.ShowShadowGroup, "그림자", true);
+            _shadowUIState.ShowShadowGroup = EditorGUILayout.Foldout(_shadowUIState.ShowShadowGroup, L("unify.shadow"), true);
             EditorGUILayout.EndHorizontal();
 
             if (_shadowUIState.ShowShadowGroup)
@@ -158,15 +161,15 @@ namespace Brightness.Utility
                 {
                     EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                     DrawShadowMasterSection();
-                    GUILayout.Space(3);
+                    DrawSeparator();
                     DrawShadow1stSection();
-                    GUILayout.Space(3);
+                    DrawSeparator();
                     DrawShadow2ndSection();
-                    GUILayout.Space(3);
+                    DrawSeparator();
                     DrawShadow3rdSection();
-                    GUILayout.Space(3);
+                    DrawSeparator();
                     DrawShadowBorderSettings();
-                    GUILayout.Space(3);
+                    DrawSeparator();
                     DrawShadowBlurMaskSection();
                     EditorGUILayout.EndVertical();
                 }
@@ -181,68 +184,68 @@ namespace Brightness.Utility
 
         private void DrawShadowMasterSection()
         {
-            _shadowUIState.ShowShadowMaster = EditorGUILayout.Foldout(_shadowUIState.ShowShadowMaster, "마스크와 강도", true);
+            _shadowUIState.ShowShadowMaster = EditorGUILayout.Foldout(_shadowUIState.ShowShadowMaster, L("unify.mask_strength"), true);
             if (!_shadowUIState.ShowShadowMaster) return;
 
             EditorGUI.indentLevel++;
-            DrawShadowSlider("강도", ref _unifySettings.ShadowStrengthValue, 0f, 1f);
+            DrawShadowSlider(L("unify.strength"), ref _unifySettings.ShadowStrengthValue, 0f, 1f);
             DrawShadowSlider("LOD", ref _unifySettings.ShadowStrengthLODValue, 0f, 1f);
             EditorGUI.indentLevel--;
         }
 
         private void DrawShadow1stSection()
         {
-            _shadowUIState.ShowShadow1st = EditorGUILayout.Foldout(_shadowUIState.ShowShadow1st, "그림자 색 1", true);
+            _shadowUIState.ShowShadow1st = EditorGUILayout.Foldout(_shadowUIState.ShowShadow1st, L("unify.shadow_1"), true);
             if (!_shadowUIState.ShowShadow1st) return;
 
             EditorGUI.indentLevel++;
-            DrawShadowColor("색상", ref _unifySettings.Shadow1stColorValue);
-            DrawShadowSlider("범위", ref _unifySettings.Shadow1stBorderValue, 0f, 1f);
-            DrawShadowSlider("흐리게", ref _unifySettings.Shadow1stBlurValue, 0f, 1f);
-            DrawShadowSlider("노멀 맵 강도", ref _unifySettings.Shadow1stNormalStrengthValue, 0f, 1f);
-            DrawShadowSlider("그림자를받는", ref _unifySettings.Shadow1stReceiveValue, 0f, 1f);
+            DrawShadowColor(L("unify.color"), ref _unifySettings.Shadow1stColorValue);
+            DrawShadowSlider(L("unify.range"), ref _unifySettings.Shadow1stBorderValue, 0f, 1f);
+            DrawShadowSlider(L("unify.blur"), ref _unifySettings.Shadow1stBlurValue, 0f, 1f);
+            DrawShadowSlider(L("unify.normal_strength"), ref _unifySettings.Shadow1stNormalStrengthValue, 0f, 1f);
+            DrawShadowSlider(L("unify.receive_shadow"), ref _unifySettings.Shadow1stReceiveValue, 0f, 1f);
             EditorGUI.indentLevel--;
         }
 
         private void DrawShadow2ndSection()
         {
-            _shadowUIState.ShowShadow2nd = EditorGUILayout.Foldout(_shadowUIState.ShowShadow2nd, "그림자 색 2", true);
+            _shadowUIState.ShowShadow2nd = EditorGUILayout.Foldout(_shadowUIState.ShowShadow2nd, L("unify.shadow_2"), true);
             if (!_shadowUIState.ShowShadow2nd) return;
 
             EditorGUI.indentLevel++;
-            DrawShadowColor("색상", ref _unifySettings.Shadow2ndColorValue);
-            DrawShadowSlider("투명도", ref _unifySettings.Shadow2ndAlphaValue, 0f, 1f);
-            DrawShadowSlider("범위", ref _unifySettings.Shadow2ndBorderValue, 0f, 1f);
-            DrawShadowSlider("흐리게", ref _unifySettings.Shadow2ndBlurValue, 0f, 1f);
-            DrawShadowSlider("노멀 맵 강도", ref _unifySettings.Shadow2ndNormalStrengthValue, 0f, 1f);
-            DrawShadowSlider("그림자를받는", ref _unifySettings.Shadow2ndReceiveValue, 0f, 1f);
+            DrawShadowColor(L("unify.color"), ref _unifySettings.Shadow2ndColorValue);
+            DrawShadowSlider(L("unify.alpha"), ref _unifySettings.Shadow2ndAlphaValue, 0f, 1f);
+            DrawShadowSlider(L("unify.range"), ref _unifySettings.Shadow2ndBorderValue, 0f, 1f);
+            DrawShadowSlider(L("unify.blur"), ref _unifySettings.Shadow2ndBlurValue, 0f, 1f);
+            DrawShadowSlider(L("unify.normal_strength"), ref _unifySettings.Shadow2ndNormalStrengthValue, 0f, 1f);
+            DrawShadowSlider(L("unify.receive_shadow"), ref _unifySettings.Shadow2ndReceiveValue, 0f, 1f);
             EditorGUI.indentLevel--;
         }
 
         private void DrawShadow3rdSection()
         {
-            _shadowUIState.ShowShadow3rd = EditorGUILayout.Foldout(_shadowUIState.ShowShadow3rd, "그림자 색 3", true);
+            _shadowUIState.ShowShadow3rd = EditorGUILayout.Foldout(_shadowUIState.ShowShadow3rd, L("unify.shadow_3"), true);
             if (!_shadowUIState.ShowShadow3rd) return;
 
             EditorGUI.indentLevel++;
-            DrawShadowColor("색상", ref _unifySettings.Shadow3rdColorValue);
-            DrawShadowSlider("투명도", ref _unifySettings.Shadow3rdAlphaValue, 0f, 1f);
+            DrawShadowColor(L("unify.color"), ref _unifySettings.Shadow3rdColorValue);
+            DrawShadowSlider(L("unify.alpha"), ref _unifySettings.Shadow3rdAlphaValue, 0f, 1f);
             EditorGUI.indentLevel--;
         }
 
         private void DrawShadowBorderSettings()
         {
-            DrawShadowColor("경계의 색", ref _unifySettings.ShadowBorderColorValue);
-            DrawShadowSlider("경계의 폭", ref _unifySettings.ShadowBorderRangeValue, 0f, 1f);
+            DrawShadowColor(L("unify.border_color"), ref _unifySettings.ShadowBorderColorValue);
+            DrawShadowSlider(L("unify.border_range"), ref _unifySettings.ShadowBorderRangeValue, 0f, 1f);
             GUILayout.Space(3);
-            DrawShadowSlider("콘트라스트", ref _unifySettings.ShadowMainStrengthValue, 0f, 1f);
-            DrawShadowSlider("그림자 색에 환경 광의 영향", ref _unifySettings.ShadowEnvStrengthValue, 0f, 1f);
+            DrawShadowSlider(L("unify.contrast"), ref _unifySettings.ShadowMainStrengthValue, 0f, 1f);
+            DrawShadowSlider(L("unify.env_strength"), ref _unifySettings.ShadowEnvStrengthValue, 0f, 1f);
             DrawShadowSlider("Shadow Caster Bias", ref _unifySettings.ShadowCasterBiasValue, 0f, 1f);
         }
 
         private void DrawShadowBlurMaskSection()
         {
-            _shadowUIState.ShowShadowBlurMask = EditorGUILayout.Foldout(_shadowUIState.ShowShadowBlurMask, "흐림 효과 마스크", true);
+            _shadowUIState.ShowShadowBlurMask = EditorGUILayout.Foldout(_shadowUIState.ShowShadowBlurMask, L("unify.blur_mask"), true);
             if (!_shadowUIState.ShowShadowBlurMask) return;
 
             EditorGUI.indentLevel++;
@@ -252,64 +255,72 @@ namespace Brightness.Utility
 
         private void DrawUnifyButtons()
         {
-            // 파괴적 수정 버튼
             SodanenEditorUI.BeginButtonRow();
-            if (SodanenEditorUI.DrawButton("수정 전 수치 비교", SodanenEditorUI.ButtonOrange))
+            if (SodanenEditorUI.DrawButton(L("unify.compare")))
             {
                 var excludeMaterials = GetExcludedMaterials();
                 _materialDifferences = MaterialUnifyHelper.FindDifferentMaterials(_targetAvatar, _unifySettings, excludeMaterials);
                 _showDifferences = true;
                 if (_materialDifferences.Count == 0)
                 {
-                    EditorUtility.DisplayDialog("결과", "모든 마테리얼의 수치가 동일합니다.", "확인");
+                    EditorUtility.DisplayDialog(L("dialog.result"), L("dialog.all_materials_match"), L("dialog.confirm"));
                 }
             }
 
-            if (SodanenEditorUI.DrawButton("마테리얼 적용", SodanenEditorUI.ButtonBlue))
+            if (SodanenEditorUI.DrawButton(L("unify.apply_material")))
             {
-                if (EditorUtility.DisplayDialog("마테리얼 통일",
-                    "선택된 속성값을 모든 lilToon 마테리얼에 적용합니다.\n이 작업은 되돌릴 수 없습니다.",
-                    "적용", "취소"))
+                if (EditorUtility.DisplayDialog(L("dialog.unify_title"),
+                    L("dialog.unify_message"),
+                    L("dialog.apply"), L("dialog.cancel")))
                 {
                     var excludeMaterials = GetExcludedMaterials();
                     MaterialUnifyHelper.UnifyMaterialProperties(_targetAvatar, _unifySettings, excludeMaterials);
                     AssetDatabase.SaveAssets();
                     _materialDifferences.Clear();
                     _showDifferences = false;
-                    EditorUtility.DisplayDialog("완료", "마테리얼 속성이 통일되었습니다.", "확인");
+                    EditorUtility.DisplayDialog(L("dialog.complete"), L("dialog.unify_complete"), L("dialog.confirm"));
                 }
             }
             SodanenEditorUI.EndButtonRow();
 
             GUILayout.Space(6);
 
-            // 비파괴적 복제 버튼
             DrawNonDestructiveButtons();
         }
 
         private void DrawNonDestructiveButtons()
         {
-            SodanenEditorUI.DrawSubSection("비파괴 모드", "아바타와 마테리얼을 복제합니다. 원본은 변경되지 않습니다.", () =>
+            SodanenEditorUI.DrawSubSection(L("nondestructive.title"), L("nondestructive.description"), () =>
             {
                 SodanenEditorUI.BeginButtonRow();
 
-                if (SodanenEditorUI.DrawButton("복제만", SodanenEditorUI.ButtonGreen))
+                if (SodanenEditorUI.DrawButton(L("nondestructive.duplicate_only")))
                 {
-                    if (EditorUtility.DisplayDialog("아바타 복제",
-                        "아바타와 모든 lilToon 마테리얼을 복제합니다.\n\n• 복제된 아바타 생성\n• 마테리얼 새 폴더에 저장\n• 원본 아바타 비활성화",
-                        "복제", "취소"))
+                    if (EditorUtility.DisplayDialog(L("dialog.duplicate_title"),
+                        L("dialog.duplicate_message"),
+                        L("dialog.duplicate"), L("dialog.cancel")))
                     {
                         ExecuteNonDestructiveDuplicate(applyUnify: false);
                     }
                 }
 
-                if (SodanenEditorUI.DrawButton("복제 + 통일", SodanenEditorUI.ButtonBlue))
+                if (SodanenEditorUI.DrawButton(L("nondestructive.duplicate_unify")))
                 {
-                    if (EditorUtility.DisplayDialog("아바타 복제 및 속성 통일",
-                        "아바타와 마테리얼을 복제하고 속성을 적용합니다.\n\n• 복제된 아바타 생성\n• 마테리얼에 속성 통일\n• 원본 아바타 비활성화",
-                        "복제 및 통일", "취소"))
+                    if (EditorUtility.DisplayDialog(L("dialog.duplicate_unify_title"),
+                        L("dialog.duplicate_unify_message"),
+                        L("dialog.duplicate_unify_button"), L("dialog.cancel")))
                     {
                         ExecuteNonDestructiveDuplicate(applyUnify: true);
+                    }
+                }
+
+                if (SodanenEditorUI.DrawButton(L("nondestructive.delete_all")))
+                {
+                    if (EditorUtility.DisplayDialog(L("dialog.delete_all_title"),
+                        L("dialog.delete_all_message"),
+                        L("dialog.delete"), L("dialog.cancel")))
+                    {
+                        DeleteDuplicatedAvatarAndMaterials();
                     }
                 }
 
@@ -317,19 +328,61 @@ namespace Brightness.Utility
             });
         }
 
+        private void DeleteDuplicatedAvatarAndMaterials()
+        {
+            if (_targetAvatar == null) return;
+
+            // _Copy로 끝나는 아바타인지 확인
+            if (!_targetAvatar.name.EndsWith("_Copy"))
+            {
+                EditorUtility.DisplayDialog(L("dialog.warning"),
+                    L("dialog.not_duplicated_avatar"), L("dialog.confirm"));
+                return;
+            }
+
+            string avatarName = _targetAvatar.name;
+            string baseName = avatarName.Substring(0, avatarName.Length - 5);
+            string folderPath = $"{BrightnessConstants.CREATE_PATH}{baseName}_Materials";
+
+            // 아바타 삭제
+            Undo.DestroyObjectImmediate(_targetAvatar);
+            _targetAvatar = null;
+            _lastAvatar = null;
+            RefreshMaterialList();
+
+            // 마테리얼 폴더 삭제
+            bool materialDeleted = false;
+            if (AssetDatabase.IsValidFolder(folderPath))
+            {
+                AssetDatabase.DeleteAsset(folderPath);
+                AssetDatabase.Refresh();
+                materialDeleted = true;
+            }
+
+            string message = materialDeleted
+                ? L("dialog.delete_all_complete", avatarName, folderPath)
+                : L("dialog.delete_avatar_complete", avatarName);
+
+            EditorUtility.DisplayDialog(L("dialog.complete"), message, L("dialog.confirm"));
+        }
+
         private void ExecuteNonDestructiveDuplicate(bool applyUnify)
         {
-            var excludeMaterials = GetExcludedMaterials();
+            // 개별 마테리얼 설정은 제외하지 않고 복제 후 별도 적용
             var result = MaterialUnifyHelper.DuplicateMaterialsNonDestructive(
                 _targetAvatar,
                 applyUnifySettings: applyUnify,
                 settings: applyUnify ? _unifySettings : null,
-                excludeMaterials: excludeMaterials);
+                excludeMaterials: null);
 
             if (result != null)
             {
                 _targetAvatar = result.DuplicatedAvatar;
                 RefreshMaterialList();
+
+                // 복제된 아바타에 그룹 오버라이드 및 커스텀 마테리얼 설정 적용
+                ApplyGroupOverridesToDuplicatedAvatar(result.DuplicatedAvatar);
+                ApplyCustomMaterialSettingsToDuplicatedAvatar(result.DuplicatedAvatar);
 
                 if (applyUnify)
                 {
@@ -337,11 +390,53 @@ namespace Brightness.Utility
                     _showDifferences = false;
                 }
 
-                EditorUtility.DisplayDialog("완료",
-                    $"복제 완료\n\n아바타: {result.DuplicatedAvatar.name}\n마테리얼: {result.MaterialCount}개", "확인");
+                EditorUtility.DisplayDialog(L("dialog.complete"),
+                    $"{L("dialog.complete")}\n\n{L("avatar.title")}: {result.DuplicatedAvatar.name}\n{L("custom.material")}: {result.MaterialCount}", L("dialog.confirm"));
 
                 Selection.activeGameObject = result.DuplicatedAvatar;
                 EditorGUIUtility.PingObject(result.DuplicatedAvatar);
+            }
+        }
+
+        private void ApplyGroupOverridesToDuplicatedAvatar(GameObject duplicatedAvatar)
+        {
+            var renderers = duplicatedAvatar.GetComponentsInChildren<Renderer>(true);
+            foreach (var group in _shadowGroups)
+            {
+                var originalMaterials = group.GetSelectedMaterials();
+                foreach (var renderer in renderers)
+                {
+                    if (renderer.sharedMaterials == null) continue;
+                    foreach (var mat in renderer.sharedMaterials)
+                    {
+                        if (mat != null && originalMaterials.Any(m => m.name == mat.name))
+                        {
+                            group.ApplySettingsToMaterial(mat);
+                            EditorUtility.SetDirty(mat);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void ApplyCustomMaterialSettingsToDuplicatedAvatar(GameObject duplicatedAvatar)
+        {
+            var renderers = duplicatedAvatar.GetComponentsInChildren<Renderer>(true);
+            foreach (var entry in _customMaterialEntries.Where(e => e.Material != null))
+            {
+                string originalName = entry.Material.name;
+                foreach (var renderer in renderers)
+                {
+                    if (renderer.sharedMaterials == null) continue;
+                    foreach (var mat in renderer.sharedMaterials)
+                    {
+                        if (mat != null && mat.name == originalName)
+                        {
+                            entry.ApplySettingsToMaterial(mat);
+                            EditorUtility.SetDirty(mat);
+                        }
+                    }
+                }
             }
         }
 
@@ -371,8 +466,8 @@ namespace Brightness.Utility
 
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField($"수치가 다른 마테리얼: {_materialDifferences.Count}개", EditorStyles.boldLabel);
-            if (GUILayout.Button("닫기", GUILayout.Width(40))) _showDifferences = false;
+            EditorGUILayout.LabelField(L("dialog.different_materials", _materialDifferences.Count), EditorStyles.boldLabel);
+            if (GUILayout.Button(L("dialog.close"), GUILayout.Width(40))) _showDifferences = false;
             EditorGUILayout.EndHorizontal();
 
             foreach (var info in _materialDifferences)
@@ -388,20 +483,20 @@ namespace Brightness.Utility
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(info.MaterialName, EditorStyles.boldLabel);
-            if (GUILayout.Button("선택", GUILayout.Width(40)))
+            if (GUILayout.Button(L("dialog.select"), GUILayout.Width(40)))
             {
                 Selection.activeObject = info.Material;
                 EditorGUIUtility.PingObject(info.Material);
             }
             EditorGUILayout.EndHorizontal();
 
-            ShowFloatDiff("Min Light", BrightnessConstants.ShaderProperties.LIGHT_MIN_LIMIT,
+            ShowFloatDiff(L("feature.minlight"), BrightnessConstants.ShaderProperties.LIGHT_MIN_LIMIT,
                 _unifySettings.UnifyMinLight, _unifySettings.MinLightValue, info);
-            ShowFloatDiff("Max Light", BrightnessConstants.ShaderProperties.LIGHT_MAX_LIMIT,
+            ShowFloatDiff(L("feature.maxlight"), BrightnessConstants.ShaderProperties.LIGHT_MAX_LIMIT,
                 _unifySettings.UnifyMaxLight, _unifySettings.MaxLightValue, info);
-            ShowFloatDiff("Back Light", BrightnessConstants.ShaderProperties.BACKLIGHT_BORDER,
+            ShowFloatDiff(L("feature.backlight"), BrightnessConstants.ShaderProperties.BACKLIGHT_BORDER,
                 _unifySettings.UnifyBackLight, _unifySettings.BackLightValue, info);
-            ShowFloatDiff("강도", BrightnessConstants.ShaderProperties.SHADOW_STRENGTH,
+            ShowFloatDiff(L("unify.strength"), BrightnessConstants.ShaderProperties.SHADOW_STRENGTH,
                 _unifySettings.UnifyShadowStrength, _unifySettings.ShadowStrengthValue, info);
 
             EditorGUILayout.EndVertical();
@@ -459,7 +554,7 @@ namespace Brightness.Utility
         private static void DrawShadowSlider(string label, ref float value, float min, float max)
         {
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(label, GUILayout.Width(140));
+            EditorGUILayout.LabelField(label, GUILayout.Width(155));
             value = EditorGUILayout.Slider(value, min, max);
             EditorGUILayout.EndHorizontal();
         }
@@ -467,9 +562,17 @@ namespace Brightness.Utility
         private static void DrawShadowColor(string label, ref Color value)
         {
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(label, GUILayout.Width(140));
+            EditorGUILayout.LabelField(label, GUILayout.Width(155));
             value = EditorGUILayout.ColorField(value);
             EditorGUILayout.EndHorizontal();
+        }
+
+        private static void DrawSeparator()
+        {
+            GUILayout.Space(4);
+            var rect = EditorGUILayout.GetControlRect(false, 1);
+            EditorGUI.DrawRect(rect, new Color(0.5f, 0.5f, 0.5f, 0.3f));
+            GUILayout.Space(4);
         }
     }
 }

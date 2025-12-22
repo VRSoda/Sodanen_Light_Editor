@@ -2,6 +2,7 @@ using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using static Brightness.Localization.Loc;
 
 namespace Brightness.Utility
 {
@@ -40,8 +41,8 @@ namespace Brightness.Utility
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.BeginHorizontal();
 
-            if (GUILayout.Button("전체", GUILayout.Width(45))) SetAllMaterials(materials, true);
-            if (GUILayout.Button("해제", GUILayout.Width(45))) SetAllMaterials(materials, false);
+            if (GUILayout.Button(L("material.select_all"), GUILayout.Width(45))) SetAllMaterials(materials, true);
+            if (GUILayout.Button(L("material.deselect_all"), GUILayout.Width(45))) SetAllMaterials(materials, false);
             
             EditorGUILayout.EndHorizontal();
             GUILayout.Space(3);

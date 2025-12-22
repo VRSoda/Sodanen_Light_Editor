@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using VRC.SDK3.Avatars.Components;
+using static Brightness.Localization.Loc;
 
 namespace Brightness.Utility
 {
@@ -20,7 +21,7 @@ namespace Brightness.Utility
         {
             if (parameters.AllMaterialPaths.Count == 0)
             {
-                EditorUtility.DisplayDialog("경고", "lilToon 쉐이더를 사용하는 오브젝트를 찾을 수 없습니다.", "확인");
+                EditorUtility.DisplayDialog(L("dialog.warning"), L("dialog.no_liltoon"), L("dialog.confirm"));
                 return;
             }
 
@@ -64,8 +65,8 @@ namespace Brightness.Utility
             
             string features = string.Join(", ", featureLogs);
 
-            EditorUtility.DisplayDialog("완료",
-                $"밝기 조절 기능이 적용되었습니다!\n\n적용된 기능 (적용된 오브젝트 수):\n{features}", "확인");
+            EditorUtility.DisplayDialog(L("dialog.complete"),
+                L("dialog.apply_complete", features), L("dialog.confirm"));
         }
 
         private static List<string> GetSelectedMaterials(Dictionary<string, bool> materials)

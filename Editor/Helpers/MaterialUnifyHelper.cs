@@ -48,8 +48,9 @@ namespace Brightness.Utility
             duplicatedAvatar.transform.SetParent(avatar.transform.parent);
             duplicatedAvatar.transform.SetSiblingIndex(avatar.transform.GetSiblingIndex() + 1);
 
-            // 원본 아바타 비활성화
-            avatar.SetActive(false);
+            // 복제된 아바타를 x축으로 -0.5 이동
+            var pos = duplicatedAvatar.transform.position;
+            duplicatedAvatar.transform.position = new Vector3(pos.x - 0.5f, pos.y, pos.z);
 
             Undo.RegisterCreatedObjectUndo(duplicatedAvatar, "Duplicate Avatar Non-Destructive");
 
@@ -59,7 +60,6 @@ namespace Brightness.Utility
             {
                 Debug.LogError("[MaterialUnifyHelper] 폴더 생성에 실패했습니다.");
                 UnityEngine.Object.DestroyImmediate(duplicatedAvatar);
-                avatar.SetActive(true);
                 return null;
             }
 

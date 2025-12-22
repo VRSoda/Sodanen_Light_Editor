@@ -1,7 +1,9 @@
 using System;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
+using Brightness.Localization;
 
 namespace Brightness.Utility
 {
@@ -9,7 +11,7 @@ namespace Brightness.Utility
     {
         #region Constants
 
-        private const string CurrentVersion = "1.0.2";
+        private const string PackageName = "com.sodanen.sodanenlighteditor";
         private const string GitHubApiUrl = "https://api.github.com/repos/VRSoda/Sodanen_Light_Editor/releases/latest";
         private const float UpdateCheckInterval = 3600f; // 1시간마다 체크
 
@@ -20,27 +22,34 @@ namespace Brightness.Utility
         private static bool s_updateCheckStarted;
         private static bool s_updateAvailable;
         private static string s_latestVersion = "";
+        private static string s_currentVersion;
         private static double s_lastCheckTime;
         private static UnityWebRequest s_webRequest;
+
+        private static string CurrentVersion
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(s_currentVersion))
+                {
+                    s_currentVersion = GetPackageVersion();
+                }
+                return s_currentVersion;
+            }
+        }
 
         #endregion
 
         #region Colors
 
         // Theme - 전문적인 다크 테마
-        public static readonly Color HeaderColor = new(0.6f, 0.75f, 0.9f);
-        public static readonly Color AccentColor = new(0.78f, 0.9f, 1f);
+        public static readonly Color HeaderColor = new(191f / 255f, 222f / 255f, 255f / 255f);
+        public static readonly Color AccentColor = new(191f / 255f, 222f / 255f, 255f / 255f);
         public static readonly Color WarningColor = new(0.95f, 0.7f, 0.4f);
         public static readonly Color SuccessColor = new(0.5f, 0.8f, 0.55f);
         public static readonly Color SubtleGray = new(0.5f, 0.5f, 0.5f);
         public static readonly Color DarkBgColor = new(0.15f, 0.15f, 0.15f);
 
-        // Buttons (무채색)
-        public static readonly Color ButtonDefault = new(0.38f, 0.38f, 0.38f);
-        public static readonly Color ButtonGreen = new(0.42f, 0.42f, 0.42f);
-        public static readonly Color ButtonBlue = new(0.4f, 0.4f, 0.4f);
-        public static readonly Color ButtonOrange = new(0.44f, 0.44f, 0.44f);
-        public static readonly Color ButtonRed = new(0.36f, 0.36f, 0.36f);
 
         // Internal
         private static readonly Color SeparatorLight = new(0.32f, 0.32f, 0.32f);
@@ -81,13 +90,13 @@ namespace Brightness.Utility
 
         public static void DrawHeader()
         {
-            s_titleStyle ??= new GUIStyle(EditorStyles.boldLabel)
+            s_titleStyle = new GUIStyle(EditorStyles.boldLabel)
             {
                 fontSize = 14,
                 alignment = TextAnchor.MiddleLeft,
                 padding = new RectOffset(4, 0, 0, 0),
                 margin = new RectOffset(0, 0, 0, 0),
-                normal = { textColor = TextBright }
+                normal = { textColor = HeaderColor }
             };
             s_subtitleStyle ??= new GUIStyle(EditorStyles.label)
             {
@@ -109,7 +118,7 @@ namespace Brightness.Utility
                 GUILayout.Space(4);
                 EditorGUILayout.BeginHorizontal();
                 {
-                    EditorGUILayout.LabelField("Sodanen Light Editor", s_titleStyle);
+                    EditorGUILayout.LabelField($"Sodanen Light Editor v{CurrentVersion}", s_titleStyle);
                     GUILayout.FlexibleSpace();
                     EditorGUILayout.LabelField("Discord : Sodanen", s_versionStyle, GUILayout.Width(110));
                 }
@@ -118,25 +127,15 @@ namespace Brightness.Utility
                 // 업데이트 체크 시작
                 CheckForUpdates();
 
-                // 버전 표시 (업데이트 있을 때만 알림 추가)
+                // 업데이트 있을 때만 알림 표시
                 if (s_updateAvailable)
                 {
-                    EditorGUILayout.BeginHorizontal();
+                    var updateStyle = new GUIStyle(EditorStyles.miniLabel)
                     {
-                        EditorGUILayout.LabelField($"v{CurrentVersion}", s_subtitleStyle, GUILayout.Width(40));
-
-                        var updateStyle = new GUIStyle(EditorStyles.miniLabel)
-                        {
-                            fontSize = 9,
-                            normal = { textColor = WarningColor }
-                        };
-                        EditorGUILayout.LabelField($"→ v{s_latestVersion} 업데이트 가능 (VCC 확인)", updateStyle);
-                    }
-                    EditorGUILayout.EndHorizontal();
-                }
-                else
-                {
-                    EditorGUILayout.LabelField($"v{CurrentVersion}", s_subtitleStyle);
+                        fontSize = 9,
+                        normal = { textColor = WarningColor }
+                    };
+                    EditorGUILayout.LabelField(LocalizationManager.L("update.available", s_latestVersion), updateStyle);
                 }
                 GUILayout.Space(4);
             }
@@ -255,6 +254,21 @@ namespace Brightness.Utility
         #endregion
 
         #region Drawing - Buttons
+
+        // 무채색 버튼 색상
+        public static readonly Color ButtonGray = new(0.4f, 0.4f, 0.4f);
+
+        public static bool DrawButton(string text, float height = 28f)
+        {
+            var style = height > 24 ? ButtonStyle : SmallButtonStyle;
+            var originalHeight = style.fixedHeight;
+            style.fixedHeight = height;
+
+            bool clicked = GUILayout.Button(text, style);
+
+            style.fixedHeight = originalHeight;
+            return clicked;
+        }
 
         public static bool DrawButton(string text, Color bgColor, float height = 28f)
         {
@@ -424,6 +438,56 @@ namespace Brightness.Utility
                 if (num1 < num2) return -1;
             }
             return 0;
+        }
+
+        private static string GetPackageVersion()
+        {
+            // Unity PackageManager API로 버전 가져오기
+            var packageInfo = UnityEditor.PackageManager.PackageInfo.FindForAssetPath("Packages/" + PackageName);
+            if (packageInfo != null)
+            {
+                return packageInfo.version;
+            }
+
+            // Assets 폴더 내 패키지인 경우 package.json 직접 읽기
+            string[] guids = AssetDatabase.FindAssets("package t:TextAsset", new[] { "Assets/SodanenLightEditor" });
+            foreach (string guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                if (path.EndsWith("package.json"))
+                {
+                    string json = File.ReadAllText(path);
+                    return ParseVersionFromPackageJson(json);
+                }
+            }
+
+            // 직접 경로로 시도
+            string directPath = "Assets/SodanenLightEditor/package.json";
+            if (File.Exists(directPath))
+            {
+                string json = File.ReadAllText(directPath);
+                return ParseVersionFromPackageJson(json);
+            }
+
+            return "Unknown";
+        }
+
+        private static string ParseVersionFromPackageJson(string json)
+        {
+            // "version":"1.0.3" 형식 파싱
+            const string versionKey = "\"version\":";
+            int startIndex = json.IndexOf(versionKey, StringComparison.Ordinal);
+            if (startIndex < 0) return "Unknown";
+
+            startIndex += versionKey.Length;
+            // 공백 스킵
+            while (startIndex < json.Length && (json[startIndex] == ' ' || json[startIndex] == '"'))
+                startIndex++;
+
+            int endIndex = json.IndexOf("\"", startIndex, StringComparison.Ordinal);
+            if (endIndex < 0) return "Unknown";
+
+            return json.Substring(startIndex, endIndex - startIndex);
         }
 
         #endregion

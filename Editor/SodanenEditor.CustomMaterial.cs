@@ -1,5 +1,7 @@
 using UnityEditor;
 using UnityEngine;
+using Brightness.Localization;
+using static Brightness.Localization.Loc;
 
 namespace Brightness.Utility
 {
@@ -14,7 +16,7 @@ namespace Brightness.Utility
             {
                 if (_customMaterialEntries.Count == 0)
                 {
-                    EditorGUILayout.LabelField("+ 버튼으로 마테리얼을 추가하세요", SodanenEditorUI.InfoStyle);
+                    EditorGUILayout.LabelField(L("custom.add_help"), SodanenEditorUI.InfoStyle);
                 }
                 else
                 {
@@ -22,7 +24,7 @@ namespace Brightness.Utility
                     DrawCustomMaterialList();
 
                     GUILayout.Space(5);
-                    EditorGUILayout.LabelField("이 마테리얼들은 '마테리얼 속성 통일'에서 제외됩니다", SodanenEditorUI.InfoStyle);
+                    EditorGUILayout.LabelField(L("custom.exclude_notice"), SodanenEditorUI.InfoStyle);
                 }
             }
             EditorGUILayout.EndVertical();
@@ -32,7 +34,7 @@ namespace Brightness.Utility
         {
             EditorGUILayout.BeginHorizontal();
             _showCustomMaterialSection = EditorGUILayout.Foldout(
-                _showCustomMaterialSection, $"개별 마테리얼 그림자 조절 ({_customMaterialEntries.Count}개)", true);
+                _showCustomMaterialSection, L("custom.title", _customMaterialEntries.Count), true);
 
             GUI.backgroundColor = new Color(0.3f, 0.8f, 0.5f);
             if (GUILayout.Button("+", GUILayout.Width(25)))
@@ -69,7 +71,7 @@ namespace Brightness.Utility
 
             EditorGUILayout.BeginHorizontal();
             entry.IsExpanded = EditorGUILayout.Foldout(
-                entry.IsExpanded, entry.Material != null ? entry.Material.name : "(마테리얼 선택)", true);
+                entry.IsExpanded, entry.Material != null ? entry.Material.name : L("custom.select_material"), true);
 
             GUI.backgroundColor = new Color(1f, 0.4f, 0.4f);
             if (GUILayout.Button("X", GUILayout.Width(22)))
@@ -97,7 +99,7 @@ namespace Brightness.Utility
             if (entry.Material == null) return;
 
             GUILayout.Space(3);
-            DrawGroupSlider("강도", ref entry.ShadowStrength, 0f, 1f);
+            DrawGroupSlider(L("unify.strength"), ref entry.ShadowStrength, 0f, 1f);
             GUILayout.Space(3);
 
             DrawShadow1stGroup(entry);
@@ -110,14 +112,14 @@ namespace Brightness.Utility
         private void DrawMaterialField(CustomMaterialShadowEntry entry)
         {
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("마테리얼", GUILayout.Width(60));
+            EditorGUILayout.LabelField(L("custom.material"), GUILayout.Width(60));
             var newMaterial = (Material)EditorGUILayout.ObjectField(entry.Material, typeof(Material), false);
             if (newMaterial != entry.Material)
             {
                 entry.Material = newMaterial;
                 entry.ReadFromMaterial();
             }
-            if (entry.Material != null && GUILayout.Button("현재값", GUILayout.Width(50)))
+            if (entry.Material != null && GUILayout.Button(L("custom.current_value"), GUILayout.Width(50)))
             {
                 entry.ReadFromMaterial();
             }
@@ -126,26 +128,26 @@ namespace Brightness.Utility
 
         private void DrawShadow1stGroup(CustomMaterialShadowEntry entry)
         {
-            EditorGUILayout.LabelField("그림자 1", EditorStyles.miniLabel);
-            DrawGroupColor("색상", ref entry.Shadow1stColor);
-            DrawGroupSlider("범위", ref entry.Shadow1stBorder, 0f, 1f);
-            DrawGroupSlider("흐리게", ref entry.Shadow1stBlur, 0f, 1f);
+            EditorGUILayout.LabelField(L("custom.shadow_1"), EditorStyles.miniLabel);
+            DrawGroupColor(L("unify.color"), ref entry.Shadow1stColor);
+            DrawGroupSlider(L("unify.range"), ref entry.Shadow1stBorder, 0f, 1f);
+            DrawGroupSlider(L("unify.blur"), ref entry.Shadow1stBlur, 0f, 1f);
         }
 
         private void DrawShadow2ndGroup(CustomMaterialShadowEntry entry)
         {
-            EditorGUILayout.LabelField("그림자 2", EditorStyles.miniLabel);
-            DrawGroupColor("색상", ref entry.Shadow2ndColor);
-            DrawGroupSlider("투명도", ref entry.Shadow2ndAlpha, 0f, 1f);
-            DrawGroupSlider("범위", ref entry.Shadow2ndBorder, 0f, 1f);
-            DrawGroupSlider("흐리게", ref entry.Shadow2ndBlur, 0f, 1f);
+            EditorGUILayout.LabelField(L("custom.shadow_2"), EditorStyles.miniLabel);
+            DrawGroupColor(L("unify.color"), ref entry.Shadow2ndColor);
+            DrawGroupSlider(L("unify.alpha"), ref entry.Shadow2ndAlpha, 0f, 1f);
+            DrawGroupSlider(L("unify.range"), ref entry.Shadow2ndBorder, 0f, 1f);
+            DrawGroupSlider(L("unify.blur"), ref entry.Shadow2ndBlur, 0f, 1f);
         }
 
         private void DrawShadow3rdGroup(CustomMaterialShadowEntry entry)
         {
-            EditorGUILayout.LabelField("그림자 3", EditorStyles.miniLabel);
-            DrawGroupColor("색상", ref entry.Shadow3rdColor);
-            DrawGroupSlider("투명도", ref entry.Shadow3rdAlpha, 0f, 1f);
+            EditorGUILayout.LabelField(L("custom.shadow_3"), EditorStyles.miniLabel);
+            DrawGroupColor(L("unify.color"), ref entry.Shadow3rdColor);
+            DrawGroupSlider(L("unify.alpha"), ref entry.Shadow3rdAlpha, 0f, 1f);
         }
 
         private static void DrawGroupSlider(string label, ref float value, float min, float max)

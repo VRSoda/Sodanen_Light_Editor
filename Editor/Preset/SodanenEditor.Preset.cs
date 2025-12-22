@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using Brightness.Localization;
+using static Brightness.Localization.Loc;
 
 namespace Brightness.Utility
 {
@@ -34,7 +36,7 @@ namespace Brightness.Utility
 
         private void DrawPresetSection()
         {
-            SodanenEditorUI.DrawSectionBox("프리셋", () =>
+            SodanenEditorUI.DrawSectionBox(L("preset.title"), () =>
             {
                 GUILayout.Space(5);
                 DrawPresetHeader();
@@ -61,9 +63,9 @@ namespace Brightness.Utility
         private void DrawPresetHeader()
         {
             EditorGUILayout.BeginHorizontal();
-            _showPresetSection = EditorGUILayout.Foldout(_showPresetSection, "프리셋 관리", true);
+            _showPresetSection = EditorGUILayout.Foldout(_showPresetSection, L("preset.management"), true);
 
-            if (GUILayout.Button("새로고침", GUILayout.Width(60)))
+            if (GUILayout.Button(L("preset.refresh"), SodanenEditorUI.SmallButtonStyle, GUILayout.Width(60)))
             {
                 PresetManager.RefreshCache();
                 RefreshPresetList();
@@ -76,7 +78,7 @@ namespace Brightness.Utility
         {
             if (_presets.Count == 0)
             {
-                EditorGUILayout.HelpBox("저장된 프리셋이 없습니다.", MessageType.Info);
+                EditorGUILayout.HelpBox(L("preset.empty"), MessageType.Info);
                 return;
             }
 
@@ -127,36 +129,30 @@ namespace Brightness.Utility
 
         private void DrawPresetButtons()
         {
-            EditorGUILayout.BeginHorizontal();
+            var hasSelection = _selectedPresetIndex >= 0 && _selectedPresetIndex < _presets.Count;
 
-            GUI.backgroundColor = new Color(0.3f, 0.8f, 0.5f);
-            if (GUILayout.Button("현재 설정 저장", GUILayout.Height(25)))
+            SodanenEditorUI.BeginButtonRow();
+            if (SodanenEditorUI.DrawButton(L("preset.save_current"), SodanenEditorUI.ButtonGray, 25))
             {
-                _newPresetName = "새 프리셋 " + (_presets.Count + 1);
+                _newPresetName = L("preset.new_name", _presets.Count + 1);
                 _newPresetDescription = "";
                 _showSavePresetPopup = true;
             }
 
-            var hasSelection = _selectedPresetIndex >= 0 && _selectedPresetIndex < _presets.Count;
-
-            GUI.backgroundColor = hasSelection ? new Color(0.4f, 0.7f, 1f) : Color.gray;
             EditorGUI.BeginDisabledGroup(!hasSelection);
-            if (GUILayout.Button("적용", GUILayout.Height(25)))
+            if (SodanenEditorUI.DrawButton(L("preset.apply"), SodanenEditorUI.ButtonGray, 25))
             {
                 ApplySelectedPreset();
             }
             EditorGUI.EndDisabledGroup();
-
-            GUI.backgroundColor = Color.white;
-            EditorGUILayout.EndHorizontal();
+            SodanenEditorUI.EndButtonRow();
 
             GUILayout.Space(3);
 
-            EditorGUILayout.BeginHorizontal();
-
+            SodanenEditorUI.BeginButtonRow();
             EditorGUI.BeginDisabledGroup(!hasSelection);
 
-            if (GUILayout.Button("이름 변경", GUILayout.Height(22)))
+            if (SodanenEditorUI.DrawButton(L("preset.rename"), SodanenEditorUI.ButtonGray, 22))
             {
                 if (hasSelection)
                 {
@@ -165,42 +161,38 @@ namespace Brightness.Utility
                 }
             }
 
-            GUI.backgroundColor = new Color(1f, 0.4f, 0.4f);
-            if (GUILayout.Button("삭제", GUILayout.Height(22)))
+            if (SodanenEditorUI.DrawButton(L("preset.delete"), SodanenEditorUI.ButtonGray, 22))
             {
                 if (hasSelection)
                 {
                     DeleteSelectedPreset();
                 }
             }
-            GUI.backgroundColor = Color.white;
 
             EditorGUI.EndDisabledGroup();
 
-            if (GUILayout.Button("내보내기", GUILayout.Height(22)))
+            if (SodanenEditorUI.DrawButton(L("preset.export"), SodanenEditorUI.ButtonGray, 22))
             {
                 ExportPreset();
             }
 
-            if (GUILayout.Button("가져오기", GUILayout.Height(22)))
+            if (SodanenEditorUI.DrawButton(L("preset.import"), SodanenEditorUI.ButtonGray, 22))
             {
                 ImportPreset();
             }
-
-            EditorGUILayout.EndHorizontal();
+            SodanenEditorUI.EndButtonRow();
         }
 
         private void DrawSavePresetPopup()
         {
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            EditorGUILayout.LabelField("새 프리셋 저장", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField(L("preset.save_title"), EditorStyles.boldLabel);
 
-            _newPresetName = EditorGUILayout.TextField("이름", _newPresetName);
-            _newPresetDescription = EditorGUILayout.TextField("설명", _newPresetDescription);
+            _newPresetName = EditorGUILayout.TextField(L("preset.name_label"), _newPresetName);
+            _newPresetDescription = EditorGUILayout.TextField(L("preset.desc_label"), _newPresetDescription);
 
-            EditorGUILayout.BeginHorizontal();
-
-            if (GUILayout.Button("저장"))
+            SodanenEditorUI.BeginButtonRow();
+            if (SodanenEditorUI.DrawButton(L("dialog.save"), SodanenEditorUI.ButtonGray, 22))
             {
                 if (!string.IsNullOrWhiteSpace(_newPresetName))
                 {
@@ -209,29 +201,28 @@ namespace Brightness.Utility
                 }
                 else
                 {
-                    EditorUtility.DisplayDialog("오류", "프리셋 이름을 입력해주세요.", "확인");
+                    EditorUtility.DisplayDialog(L("dialog.error"), L("preset.name_required"), L("dialog.confirm"));
                 }
             }
 
-            if (GUILayout.Button("취소"))
+            if (SodanenEditorUI.DrawButton(L("dialog.cancel"), SodanenEditorUI.ButtonGray, 22))
             {
                 _showSavePresetPopup = false;
             }
+            SodanenEditorUI.EndButtonRow();
 
-            EditorGUILayout.EndHorizontal();
             EditorGUILayout.EndVertical();
         }
 
         private void DrawRenamePopup()
         {
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            EditorGUILayout.LabelField("프리셋 이름 변경", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField(L("preset.rename_title"), EditorStyles.boldLabel);
 
-            _renamePresetName = EditorGUILayout.TextField("새 이름", _renamePresetName);
+            _renamePresetName = EditorGUILayout.TextField(L("preset.new_name_label"), _renamePresetName);
 
-            EditorGUILayout.BeginHorizontal();
-
-            if (GUILayout.Button("변경"))
+            SodanenEditorUI.BeginButtonRow();
+            if (SodanenEditorUI.DrawButton(L("dialog.change"), SodanenEditorUI.ButtonGray, 22))
             {
                 if (!string.IsNullOrWhiteSpace(_renamePresetName))
                 {
@@ -242,12 +233,12 @@ namespace Brightness.Utility
                 }
             }
 
-            if (GUILayout.Button("취소"))
+            if (SodanenEditorUI.DrawButton(L("dialog.cancel"), SodanenEditorUI.ButtonGray, 22))
             {
                 _showRenamePopup = false;
             }
+            SodanenEditorUI.EndButtonRow();
 
-            EditorGUILayout.EndHorizontal();
             EditorGUILayout.EndVertical();
         }
 
@@ -261,9 +252,9 @@ namespace Brightness.Utility
 
             if (PresetManager.PresetExists(name))
             {
-                if (!EditorUtility.DisplayDialog("프리셋 덮어쓰기",
-                    $"'{name}' 프리셋이 이미 존재합니다.\n덮어쓰시겠습니까?",
-                    "덮어쓰기", "취소"))
+                if (!EditorUtility.DisplayDialog(L("preset.overwrite_title"),
+                    L("preset.overwrite_message", name),
+                    L("dialog.overwrite"), L("dialog.cancel")))
                 {
                     return;
                 }
@@ -273,7 +264,7 @@ namespace Brightness.Utility
             RefreshPresetList();
 
             _selectedPresetIndex = _presets.FindIndex(p => p.Name == name);
-            EditorUtility.DisplayDialog("저장 완료", $"프리셋 '{name}'이(가) 저장되었습니다.", "확인");
+            EditorUtility.DisplayDialog(L("preset.save_complete_title"), L("preset.save_complete_message", name), L("dialog.confirm"));
         }
 
         private void ApplySelectedPreset()
@@ -284,7 +275,7 @@ namespace Brightness.Utility
             preset.ApplyTo(_unifySettings, _customMaterialEntries);
 
             var customCount = preset.CustomMaterials?.Count ?? 0;
-            Debug.Log($"[Preset] '{preset.Name}' 프리셋 적용됨 (개별 마테리얼: {customCount}개)");
+            Debug.Log(L("preset.applied_log", preset.Name, customCount));
         }
 
         private void DeleteSelectedPreset()
@@ -292,9 +283,9 @@ namespace Brightness.Utility
             if (_selectedPresetIndex < 0 || _selectedPresetIndex >= _presets.Count) return;
 
             var preset = _presets[_selectedPresetIndex];
-            if (EditorUtility.DisplayDialog("프리셋 삭제",
-                $"'{preset.Name}' 프리셋을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.",
-                "삭제", "취소"))
+            if (EditorUtility.DisplayDialog(L("preset.delete_title"),
+                L("preset.delete_message", preset.Name),
+                L("preset.delete"), L("dialog.cancel")))
             {
                 PresetManager.DeletePreset(preset.Name);
                 RefreshPresetList();
@@ -306,13 +297,13 @@ namespace Brightness.Utility
         {
             if (_selectedPresetIndex < 0 || _selectedPresetIndex >= _presets.Count)
             {
-                EditorUtility.DisplayDialog("내보내기", "먼저 내보낼 프리셋을 선택해주세요.", "확인");
+                EditorUtility.DisplayDialog(L("preset.export"), L("preset.export_select"), L("dialog.confirm"));
                 return;
             }
 
             var preset = _presets[_selectedPresetIndex];
             var path = EditorUtility.SaveFilePanel(
-                "프리셋 내보내기",
+                L("preset.export_title"),
                 "",
                 preset.Name + ".json",
                 "json"
@@ -321,14 +312,14 @@ namespace Brightness.Utility
             if (!string.IsNullOrEmpty(path))
             {
                 PresetManager.ExportPreset(preset, path);
-                EditorUtility.DisplayDialog("내보내기 완료", $"프리셋이 저장되었습니다:\n{path}", "확인");
+                EditorUtility.DisplayDialog(L("preset.export_complete_title"), L("preset.export_complete_message", path), L("dialog.confirm"));
             }
         }
 
         private void ImportPreset()
         {
             var path = EditorUtility.OpenFilePanel(
-                "프리셋 가져오기",
+                L("preset.import_title"),
                 "",
                 "json"
             );
@@ -340,7 +331,7 @@ namespace Brightness.Utility
                 {
                     RefreshPresetList();
                     _selectedPresetIndex = _presets.FindIndex(p => p.Name == preset.Name);
-                    EditorUtility.DisplayDialog("가져오기 완료", $"프리셋 '{preset.Name}'이(가) 가져왔습니다.", "확인");
+                    EditorUtility.DisplayDialog(L("preset.import_complete_title"), L("preset.import_complete_message", preset.Name), L("dialog.confirm"));
                 }
             }
         }

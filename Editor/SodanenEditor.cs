@@ -3,6 +3,8 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using VRC.SDK3.Avatars.Components;
+using Brightness.Localization;
+using static Brightness.Localization.Loc;
 
 namespace Brightness.Utility
 {
@@ -62,14 +64,18 @@ namespace Brightness.Utility
             _shadowFeatures = CreateShadowFeatures();
         }
 
-        private void OnEnable() => InitPresets();
+        private void OnEnable()
+        {
+            LocalizationManager.CheckAndSyncLilToonLanguage();
+            InitPresets();
+        }
 
-        [MenuItem("Sodanen/밝기 조절 에디터")]
+        [MenuItem("Sodanen/Light Editor")]
         public static void ShowWindow()
         {
-            var window = GetWindow<SodanenEditor>("Sodanen 에디터");
-            window.minSize = new Vector2(400, 500);
-            window.maxSize = new Vector2(550, 1200);
+            var window = GetWindow<SodanenEditor>("Sodanen Light Editor");
+            window.minSize = new Vector2(420, 500);
+            window.maxSize = new Vector2(600, 1200);
         }
 
         private void InitStyles()
@@ -87,6 +93,7 @@ namespace Brightness.Utility
         private void OnGUI()
         {
             InitStyles();
+            LocalizationManager.CheckAndSyncLilToonLanguage();
             SodanenEditorUI.DrawBackground(position);
 
             _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
@@ -129,7 +136,7 @@ namespace Brightness.Utility
 
         private void DrawAvatarSection()
         {
-            SodanenEditorUI.DrawSectionBox("아바타", () =>
+            SodanenEditorUI.DrawSectionBox(L("avatar.title"), () =>
             {
                 DrawAvatarField();
                 GUILayout.Space(4);
@@ -140,7 +147,7 @@ namespace Brightness.Utility
         private void DrawAvatarField()
         {
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("대상", EditorStyles.boldLabel, GUILayout.Width(40));
+            EditorGUILayout.LabelField(L("avatar.target"), EditorStyles.boldLabel, GUILayout.Width(55));
             _targetAvatar = (GameObject)EditorGUILayout.ObjectField(_targetAvatar, typeof(GameObject), true);
             EditorGUILayout.EndHorizontal();
         }
@@ -149,14 +156,14 @@ namespace Brightness.Utility
         {
             if (_targetAvatar == null)
             {
-                SodanenEditorUI.DrawStatusBox("아바타를 선택하세요", SodanenEditorUI.SubtleGray);
+                SodanenEditorUI.DrawStatusBox(L("avatar.select"), SodanenEditorUI.SubtleGray);
                 return;
             }
 
             var hasDescriptor = _targetAvatar.GetComponent<VRCAvatarDescriptor>() != null;
             var (text, color) = hasDescriptor
-                ? ($"lilToon 마테리얼: {_allMaterialPaths.Count}개", SodanenEditorUI.AccentColor)
-                : ("VRCAvatarDescriptor 없음", SodanenEditorUI.WarningColor);
+                ? (L("avatar.material_count", _allMaterialPaths.Count), SodanenEditorUI.AccentColor)
+                : (L("avatar.no_descriptor"), SodanenEditorUI.WarningColor);
 
             SodanenEditorUI.DrawStatusBox(text, color);
         }
@@ -169,10 +176,10 @@ namespace Brightness.Utility
         {
             if (_targetAvatar == null || _allMaterialPaths.Count == 0) return;
 
-            SodanenEditorUI.DrawSectionBox("마테리얼 설정", () =>
+            SodanenEditorUI.DrawSectionBox(L("material.title"), () =>
             {
                 _showMaterialSettingsSection = EditorGUILayout.Foldout(
-                    _showMaterialSettingsSection, "속성 통일 / 개별 조절", true);
+                    _showMaterialSettingsSection, L("material.unify_toggle"), true);
 
                 if (!_showMaterialSettingsSection) return;
 
@@ -193,8 +200,7 @@ namespace Brightness.Utility
 
             using (new EditorGUI.DisabledScope(!canApply))
             {
-                var buttonColor = canApply ? SodanenEditorUI.AccentColor : Color.gray;
-                if (SodanenEditorUI.DrawButton("적용하기", buttonColor, ApplyButtonHeight))
+                if (SodanenEditorUI.DrawButton(L("button.apply"), SodanenEditorUI.AccentColor, ApplyButtonHeight))
                 {
                     ApplyAllSettings();
                 }
@@ -203,8 +209,8 @@ namespace Brightness.Utility
             if (!canApply)
             {
                 var message = _targetAvatar == null
-                    ? "아바타를 선택해주세요"
-                    : "최소 하나의 기능을 선택해주세요";
+                    ? L("button.select_avatar")
+                    : L("button.select_feature");
                 EditorGUILayout.LabelField(message, SodanenEditorUI.InfoStyle);
             }
         }

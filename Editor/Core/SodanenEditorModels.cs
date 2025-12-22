@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using Brightness.Localization;
 
 namespace Brightness.Utility
 {
@@ -71,8 +72,10 @@ namespace Brightness.Utility
 
     internal class FeatureInfo
     {
-        public string Label { get; set; }
-        public string Tooltip { get; set; }
+        public string LabelKey { get; set; }
+        public string TooltipKey { get; set; }
+        public string Label => LocalizationManager.L(LabelKey);
+        public string Tooltip => LocalizationManager.L(TooltipKey);
         public Func<FeatureToggles, bool> IsEnabled { get; set; }
         public Action<FeatureToggles, bool> SetEnabled { get; set; }
         public Func<FeatureMaterialSelections, bool> IsExpanded { get; set; }
@@ -135,19 +138,33 @@ namespace Brightness.Utility
         public void ApplyToMaterial()
         {
             if (Material == null) return;
+            ApplySettingsToMaterial(Material);
+        }
 
-            SetFloat(BrightnessConstants.ShaderProperties.SHADOW_STRENGTH, ShadowStrength);
-            SetColor(BrightnessConstants.ShaderProperties.SHADOW_COLOR, Shadow1stColor);
-            SetFloat(BrightnessConstants.ShaderProperties.SHADOW_BORDER, Shadow1stBorder);
-            SetFloat(BrightnessConstants.ShaderProperties.SHADOW_BLUR, Shadow1stBlur);
-            SetColor(BrightnessConstants.ShaderProperties.SHADOW_2ND_COLOR,
-                new Color(Shadow2ndColor.r, Shadow2ndColor.g, Shadow2ndColor.b, Shadow2ndAlpha));
-            SetFloat(BrightnessConstants.ShaderProperties.SHADOW_2ND_BORDER, Shadow2ndBorder);
-            SetFloat(BrightnessConstants.ShaderProperties.SHADOW_2ND_BLUR, Shadow2ndBlur);
-            SetColor(BrightnessConstants.ShaderProperties.SHADOW_3RD_COLOR,
-                new Color(Shadow3rdColor.r, Shadow3rdColor.g, Shadow3rdColor.b, Shadow3rdAlpha));
+        public void ApplySettingsToMaterial(Material mat)
+        {
+            if (mat == null) return;
 
-            EditorUtility.SetDirty(Material);
+            if (mat.HasProperty(BrightnessConstants.ShaderProperties.SHADOW_STRENGTH))
+                mat.SetFloat(BrightnessConstants.ShaderProperties.SHADOW_STRENGTH, ShadowStrength);
+            if (mat.HasProperty(BrightnessConstants.ShaderProperties.SHADOW_COLOR))
+                mat.SetColor(BrightnessConstants.ShaderProperties.SHADOW_COLOR, Shadow1stColor);
+            if (mat.HasProperty(BrightnessConstants.ShaderProperties.SHADOW_BORDER))
+                mat.SetFloat(BrightnessConstants.ShaderProperties.SHADOW_BORDER, Shadow1stBorder);
+            if (mat.HasProperty(BrightnessConstants.ShaderProperties.SHADOW_BLUR))
+                mat.SetFloat(BrightnessConstants.ShaderProperties.SHADOW_BLUR, Shadow1stBlur);
+            if (mat.HasProperty(BrightnessConstants.ShaderProperties.SHADOW_2ND_COLOR))
+                mat.SetColor(BrightnessConstants.ShaderProperties.SHADOW_2ND_COLOR,
+                    new Color(Shadow2ndColor.r, Shadow2ndColor.g, Shadow2ndColor.b, Shadow2ndAlpha));
+            if (mat.HasProperty(BrightnessConstants.ShaderProperties.SHADOW_2ND_BORDER))
+                mat.SetFloat(BrightnessConstants.ShaderProperties.SHADOW_2ND_BORDER, Shadow2ndBorder);
+            if (mat.HasProperty(BrightnessConstants.ShaderProperties.SHADOW_2ND_BLUR))
+                mat.SetFloat(BrightnessConstants.ShaderProperties.SHADOW_2ND_BLUR, Shadow2ndBlur);
+            if (mat.HasProperty(BrightnessConstants.ShaderProperties.SHADOW_3RD_COLOR))
+                mat.SetColor(BrightnessConstants.ShaderProperties.SHADOW_3RD_COLOR,
+                    new Color(Shadow3rdColor.r, Shadow3rdColor.g, Shadow3rdColor.b, Shadow3rdAlpha));
+
+            EditorUtility.SetDirty(mat);
         }
 
         private void ReadFloat(string prop, ref float value)
@@ -230,25 +247,32 @@ namespace Brightness.Utility
 
             foreach (var material in selectedMaterials)
             {
-                material.SetColor(BrightnessConstants.ShaderProperties.SHADOW_COLOR, Shadow1stColor);
-                material.SetFloat(BrightnessConstants.ShaderProperties.SHADOW_BORDER, Shadow1stBorder);
-                material.SetFloat(BrightnessConstants.ShaderProperties.SHADOW_BLUR, Shadow1stBlur);
-
-                material.SetColor(BrightnessConstants.ShaderProperties.SHADOW_2ND_COLOR,
-                    new Color(Shadow2ndColor.r, Shadow2ndColor.g, Shadow2ndColor.b, Shadow2ndAlpha));
-                material.SetFloat(BrightnessConstants.ShaderProperties.SHADOW_2ND_BORDER, Shadow2ndBorder);
-                material.SetFloat(BrightnessConstants.ShaderProperties.SHADOW_2ND_BLUR, Shadow2ndBlur);
-
-                material.SetColor(BrightnessConstants.ShaderProperties.SHADOW_3RD_COLOR,
-                    new Color(Shadow3rdColor.r, Shadow3rdColor.g, Shadow3rdColor.b, Shadow3rdAlpha));
-
-                EditorUtility.SetDirty(material);
+                ApplySettingsToMaterial(material);
             }
 
             if (selectedMaterials.Count > 0)
             {
                 Debug.Log($"[ShadowGroup] '{GroupName}' 그룹: {selectedMaterials.Count}개 마테리얼에 그림자 설정 적용됨");
             }
+        }
+
+        public void ApplySettingsToMaterial(Material mat)
+        {
+            if (mat == null) return;
+
+            mat.SetColor(BrightnessConstants.ShaderProperties.SHADOW_COLOR, Shadow1stColor);
+            mat.SetFloat(BrightnessConstants.ShaderProperties.SHADOW_BORDER, Shadow1stBorder);
+            mat.SetFloat(BrightnessConstants.ShaderProperties.SHADOW_BLUR, Shadow1stBlur);
+
+            mat.SetColor(BrightnessConstants.ShaderProperties.SHADOW_2ND_COLOR,
+                new Color(Shadow2ndColor.r, Shadow2ndColor.g, Shadow2ndColor.b, Shadow2ndAlpha));
+            mat.SetFloat(BrightnessConstants.ShaderProperties.SHADOW_2ND_BORDER, Shadow2ndBorder);
+            mat.SetFloat(BrightnessConstants.ShaderProperties.SHADOW_2ND_BLUR, Shadow2ndBlur);
+
+            mat.SetColor(BrightnessConstants.ShaderProperties.SHADOW_3RD_COLOR,
+                new Color(Shadow3rdColor.r, Shadow3rdColor.g, Shadow3rdColor.b, Shadow3rdAlpha));
+
+            EditorUtility.SetDirty(mat);
         }
     }
 }
