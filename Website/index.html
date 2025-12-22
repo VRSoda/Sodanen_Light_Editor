@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sodanen VPM Packages</title>
+    <script type="module" src="https://unpkg.com/@fluentui/web-components"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Sodanen VPM Packages</h1>
+            <p class="description">VRChat 아바타용 패키지 모음</p>
+        </div>
+
+        <!-- Add to VCC Section -->
+        <div class="vcc-section">
+            <fluent-button id="addListingToVCC" appearance="accent">
+                <svg slot="start" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 12.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11zM8 4a.75.75 0 0 1 .75.75v2.5h2.5a.75.75 0 0 1 0 1.5h-2.5v2.5a.75.75 0 0 1-1.5 0v-2.5h-2.5a.75.75 0 0 1 0-1.5h2.5v-2.5A.75.75 0 0 1 8 4z"/>
+                </svg>
+                VCC에 추가하기
+            </fluent-button>
+            <fluent-button id="helpButton" appearance="subtle">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM6.5 5.5a1.5 1.5 0 1 1 3 0c0 .59-.36 1.12-.77 1.49-.2.18-.39.32-.53.41V8a.75.75 0 0 1-1.5 0V7.25c0-.3.18-.57.45-.68.14-.06.38-.2.62-.41.23-.21.23-.44.23-.66zm.75 5.25a.75.75 0 1 1 1.5 0 .75.75 0 0 1-1.5 0z"/>
+                </svg>
+            </fluent-button>
+        </div>
+
+        <!-- URL Copy Section -->
+        <div class="url-section">
+            <fluent-text-field id="vccUrl" readonly value="" class="url-field"></fluent-text-field>
+            <fluent-button id="copyUrl" appearance="outline">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M4 4v8h8V4H4zM3 3h10a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/>
+                    <path d="M1 1h10v2H3v8H1V1z"/>
+                </svg>
+            </fluent-button>
+        </div>
+
+        <!-- Help Dialog -->
+        <fluent-dialog id="helpDialog" hidden>
+            <div class="dialog-content">
+                <h2>VCC에 추가하는 방법</h2>
+                <ol>
+                    <li><a href="https://vrchat.com/home/download" target="_blank">VRChat Creator Companion</a>을 설치합니다.</li>
+                    <li>"VCC에 추가하기" 버튼을 클릭하거나, 위의 URL을 복사합니다.</li>
+                    <li>VCC에서 Settings → Packages → Add Repository를 선택합니다.</li>
+                    <li>URL을 붙여넣고 Add를 클릭합니다.</li>
+                </ol>
+                <fluent-button id="closeHelp" appearance="accent">닫기</fluent-button>
+            </div>
+        </fluent-dialog>
+
+        <!-- Packages Section -->
+        <div class="packages-section">
+            <h2>패키지 목록</h2>
+            <div id="packageList" class="package-list">
+                <!-- Packages will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>
+                <a href="https://github.com/VRSoda" target="_blank">GitHub</a> ·
+                Made by Sodanen
+            </p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
