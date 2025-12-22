@@ -1,0 +1,78 @@
+{
+    "Name": "Sodanen",
+    "Description": "",
+    "CustomMaterials": [
+        {
+            "MaterialPath": "Assets/Avatar/Milk/Material/Chocolat_Body.mat",
+            "ShadowStrength": 1.0,
+            "Shadow1stColor": {
+                "r": 0.9764705300331116,
+                "g": 0.8980392217636108,
+                "b": 0.9058823585510254,
+                "a": 1.0
+            },
+            "Shadow1stBorder": 0.5,
+            "Shadow1stBlur": 0.17000000178813935,
+            "Shadow2ndColor": {
+                "r": 0.9607842564582825,
+                "g": 0.9137254953384399,
+                "b": 0.9490196108818054,
+                "a": 1.0
+            },
+            "Shadow2ndAlpha": 1.0,
+            "Shadow2ndBorder": 0.44999998807907107,
+            "Shadow2ndBlur": 0.699999988079071,
+            "Shadow3rdColor": {
+                "r": 0.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 0.0
+            },
+            "Shadow3rdAlpha": 0.0
+        }
+    ],
+    "MinLightValue": 0.05000000074505806,
+    "MaxLightValue": 1.0,
+    "BackLightValue": 0.3499999940395355,
+    "ShadowStrengthValue": 1.0,
+    "ShadowStrengthLODValue": 0.0,
+    "Shadow1stColorValue": {
+        "r": 0.8274509906768799,
+        "g": 0.9254902005195618,
+        "b": 1.0,
+        "a": 1.0
+    },
+    "Shadow1stBorderValue": 0.5,
+    "Shadow1stBlurValue": 0.17000000178813935,
+    "Shadow1stNormalStrengthValue": 1.0,
+    "Shadow1stReceiveValue": 1.0,
+    "Shadow2ndColorValue": {
+        "r": 0.8078431487083435,
+        "g": 0.9137254953384399,
+        "b": 1.0,
+        "a": 1.0
+    },
+    "Shadow2ndAlphaValue": 1.0,
+    "Shadow2ndBorderValue": 0.44999998807907107,
+    "Shadow2ndBlurValue": 0.699999988079071,
+    "Shadow2ndNormalStrengthValue": 1.0,
+    "Shadow2ndReceiveValue": 0.0,
+    "Shadow3rdColorValue": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+    },
+    "Shadow3rdAlphaValue": 0.0,
+    "ShadowBorderColorValue": {
+        "r": 0.8235294222831726,
+        "g": 0.8666666746139526,
+        "b": 0.9686274528503418,
+        "a": 1.0
+    },
+    "ShadowBorderRangeValue": 0.0,
+    "ShadowMainStrengthValue": 0.0,
+    "ShadowEnvStrengthValue": 0.0,
+    "ShadowCasterBiasValue": 0.0,
+    "ShadowBlurMaskLODValue": 0.0
+}
