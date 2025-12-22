@@ -6,7 +6,7 @@ namespace Brightness.Utility
     public static class BrightnessConstants
     {
         // 기본 경로
-        public const string BASE_PATH = "Assets/BRIGHTNESS_CONTROL/";
+        public const string BASE_PATH = "Assets/SodanenLightEditor/";
         public const string ANIMATION_PATH = BASE_PATH + "Animation/";
         public const string CREATE_PATH = BASE_PATH + "Created/";
 
