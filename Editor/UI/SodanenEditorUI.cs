@@ -13,7 +13,7 @@ namespace Brightness.Utility
 
         private const string PackageName = "com.sodanen.sodanenlighteditor";
         private const string GitHubApiUrl = "https://api.github.com/repos/VRSoda/Sodanen_Light_Editor/releases/latest";
-        private const float UpdateCheckInterval = 3600f; // 1시간마다 체크
+        private const float UpdateCheckInterval = 900f; // 15분마다 체크
 
         #endregion
 
