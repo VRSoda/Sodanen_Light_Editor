@@ -140,24 +140,19 @@ namespace Brightness.Utility
         /// </summary>
         private static string CreateMaterialFolder(string avatarName)
         {
-            string basePath = BrightnessConstants.CREATE_PATH;
+            string basePath = BrightnessConstants.CREATE_PATH.TrimEnd('/');
 
-            // 기본 폴더가 없으면 생성
-            if (!AssetDatabase.IsValidFolder(basePath.TrimEnd('/')))
-            {
-                string parentPath = Path.GetDirectoryName(basePath.TrimEnd('/'));
-                string folderName = Path.GetFileName(basePath.TrimEnd('/'));
-                AssetDatabase.CreateFolder(parentPath, folderName);
-            }
+            // 기본 폴더 경로를 재귀적으로 생성
+            EnsureFolderExists(basePath);
 
             // 아바타별 마테리얼 폴더 생성
             string safeName = SanitizeFileName(avatarName);
             string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-            string folderName2 = $"{safeName}_Materials_{timestamp}";
-            string fullPath = $"{basePath}{folderName2}";
+            string folderName = $"{safeName}_Materials_{timestamp}";
+            string fullPath = $"{basePath}/{folderName}";
 
             // 폴더 생성
-            string guid = AssetDatabase.CreateFolder(basePath.TrimEnd('/'), folderName2);
+            string guid = AssetDatabase.CreateFolder(basePath, folderName);
             if (string.IsNullOrEmpty(guid))
             {
                 Debug.LogError($"[MaterialUnifyHelper] 폴더 생성 실패: {fullPath}");
@@ -165,6 +160,50 @@ namespace Brightness.Utility
             }
 
             return fullPath;
+        }
+
+        /// <summary>
+        /// 폴더 경로가 존재하지 않으면 재귀적으로 생성
+        /// </summary>
+        private static void EnsureFolderExists(string folderPath)
+        {
+            // 경로 정규화 (백슬래시를 포워드 슬래시로 변환)
+            folderPath = folderPath.Replace('\\', '/').TrimEnd('/');
+
+            if (AssetDatabase.IsValidFolder(folderPath))
+                return;
+
+            // 부모 폴더 경로 추출
+            int lastSlash = folderPath.LastIndexOf('/');
+            if (lastSlash <= 0)
+                return; // "Assets" 레벨이면 중단
+
+            string parentPath = folderPath.Substring(0, lastSlash);
+            string folderName = folderPath.Substring(lastSlash + 1);
+
+            // 부모 폴더가 없으면 먼저 생성 (재귀)
+            EnsureFolderExists(parentPath);
+
+            // 실제 디스크에 폴더가 존재하는지 확인
+            string absolutePath = Path.Combine(Application.dataPath.Replace("/Assets", ""), folderPath);
+            if (!Directory.Exists(absolutePath))
+            {
+                // 디스크에 폴더 생성
+                Directory.CreateDirectory(absolutePath);
+            }
+
+            // Unity AssetDatabase에 폴더 등록
+            AssetDatabase.Refresh();
+
+            // 그래도 유효하지 않으면 AssetDatabase.CreateFolder 시도
+            if (!AssetDatabase.IsValidFolder(folderPath))
+            {
+                string guid = AssetDatabase.CreateFolder(parentPath, folderName);
+                if (string.IsNullOrEmpty(guid))
+                {
+                    Debug.LogWarning($"[MaterialUnifyHelper] AssetDatabase.CreateFolder 실패, 하지만 디스크에는 생성됨: {folderPath}");
+                }
+            }
         }
 
         /// <summary>
