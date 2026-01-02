@@ -14,6 +14,7 @@ namespace Brightness.Localization
             { "avatar.title", "アバター" },
             { "avatar.target", "対象" },
             { "avatar.select", "アバターを選択してください" },
+            { "avatar.select_dropdown", "-- アバター選択 --" },
             { "avatar.material_count", "lilToon マテリアル: {0}個" },
             { "avatar.no_descriptor", "VRCAvatarDescriptor なし" },
 
@@ -36,6 +37,7 @@ namespace Brightness.Localization
 
             // ===== Material Settings =====
             { "material.title", "マテリアル設定" },
+            { "material.window_title", "マテリアルエディター" },
             { "material.unify_toggle", "プロパティ統一 / 個別調整" },
             { "material.select_all", "全て" },
             { "material.deselect_all", "解除" },
@@ -158,6 +160,26 @@ namespace Brightness.Localization
             { "button.apply", "適用する" },
             { "button.select_avatar", "アバターを選択してください" },
             { "button.select_feature", "少なくとも1つの機能を選択してください" },
+
+            // ===== Cloth Editor =====
+            { "cloth.title", "トグルグループ" },
+            { "cloth.selected_count", "登録アイテム: {0}個" },
+            { "cloth.no_items", "グループを追加してください" },
+            { "cloth.settings", "設定" },
+            { "cloth.saved_state", "状態を保存" },
+            { "cloth.apply", "Toggle作成" },
+            { "cloth.select_items", "アイテムを追加してください" },
+            { "cloth.apply_complete", "{0}個の衣装トグルが作成されました！" },
+            { "cloth.drop_here", "ここにドラッグ＆ドロップ" },
+            { "cloth.default_index", "デフォルト" },
+            { "cloth.target_menu", "対象メニュー" },
+            { "cloth.add_all_off", "All OFF追加" },
+            { "cloth.toggle_name", "パラメータ" },
+            { "cloth.save_folder", "保存フォルダ" },
+            { "cloth.default_folder", "(デフォルト位置)" },
+            { "cloth.select_folder", "保存フォルダ選択" },
+            { "cloth.folder_error", "Assetsフォルダ内のみ選択できます。" },
+            { "cloth.new_menu", "新規メニュー作成" },
 
             // ===== Update =====
             { "update.available", "→ v{0} アップデート可能 (VCC確認)" },

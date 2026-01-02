@@ -14,6 +14,7 @@ namespace Brightness.Localization
             { "avatar.title", "角色" },
             { "avatar.target", "目标" },
             { "avatar.select", "请选择角色" },
+            { "avatar.select_dropdown", "-- 选择角色 --" },
             { "avatar.material_count", "lilToon 材质: {0}个" },
             { "avatar.no_descriptor", "无 VRCAvatarDescriptor" },
 
@@ -36,6 +37,7 @@ namespace Brightness.Localization
 
             // ===== Material Settings =====
             { "material.title", "材质设置" },
+            { "material.window_title", "材质编辑器" },
             { "material.unify_toggle", "属性统一 / 单独调节" },
             { "material.select_all", "全选" },
             { "material.deselect_all", "取消" },
@@ -158,6 +160,26 @@ namespace Brightness.Localization
             { "button.apply", "应用" },
             { "button.select_avatar", "请选择角色" },
             { "button.select_feature", "请至少选择一个功能" },
+
+            // ===== Cloth Editor =====
+            { "cloth.title", "切换组" },
+            { "cloth.selected_count", "已注册项目: {0}个" },
+            { "cloth.no_items", "请添加组" },
+            { "cloth.settings", "设置" },
+            { "cloth.saved_state", "保存状态" },
+            { "cloth.apply", "创建Toggle" },
+            { "cloth.select_items", "请添加项目" },
+            { "cloth.apply_complete", "已创建{0}个服装切换！" },
+            { "cloth.drop_here", "拖放到这里" },
+            { "cloth.default_index", "默认值" },
+            { "cloth.target_menu", "目标菜单" },
+            { "cloth.add_all_off", "添加全部关闭" },
+            { "cloth.toggle_name", "参数" },
+            { "cloth.save_folder", "保存文件夹" },
+            { "cloth.default_folder", "(默认位置)" },
+            { "cloth.select_folder", "选择保存文件夹" },
+            { "cloth.folder_error", "只能选择Assets文件夹内的文件夹。" },
+            { "cloth.new_menu", "创建新菜单" },
 
             // ===== Update =====
             { "update.available", "→ v{0} 可更新 (检查VCC)" },

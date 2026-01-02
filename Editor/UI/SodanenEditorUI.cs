@@ -76,6 +76,7 @@ namespace Brightness.Utility
         private static GUIStyle s_infoStyle;
         private static GUIStyle s_subHeaderStyle;
         private static GUIStyle s_versionStyle;
+        private static GUIStyle s_updateStyle;
         private static Texture2D s_boxBgTexture;
         private static Color s_lastStatusColor;
 
@@ -88,9 +89,9 @@ namespace Brightness.Utility
             EditorGUI.DrawRect(new Rect(0, 0, position.width, position.height), DarkBgColor);
         }
 
-        public static void DrawHeader()
+        public static void DrawHeader(string title = "Sodanen Light Editor")
         {
-            s_titleStyle = new GUIStyle(EditorStyles.boldLabel)
+            s_titleStyle ??= new GUIStyle(EditorStyles.boldLabel)
             {
                 fontSize = 14,
                 alignment = TextAnchor.MiddleLeft,
@@ -118,7 +119,7 @@ namespace Brightness.Utility
                 GUILayout.Space(4);
                 EditorGUILayout.BeginHorizontal();
                 {
-                    EditorGUILayout.LabelField($"Sodanen Light Editor v{CurrentVersion}", s_titleStyle);
+                    EditorGUILayout.LabelField($"{title} v{CurrentVersion}", s_titleStyle);
                     GUILayout.FlexibleSpace();
                     EditorGUILayout.LabelField("Discord : Sodanen", s_versionStyle, GUILayout.Width(110));
                 }
@@ -130,12 +131,12 @@ namespace Brightness.Utility
                 // 업데이트 있을 때만 알림 표시
                 if (s_updateAvailable)
                 {
-                    var updateStyle = new GUIStyle(EditorStyles.miniLabel)
+                    s_updateStyle ??= new GUIStyle(EditorStyles.miniLabel)
                     {
                         fontSize = 9,
                         normal = { textColor = WarningColor }
                     };
-                    EditorGUILayout.LabelField(LocalizationManager.L("update.available", s_latestVersion), updateStyle);
+                    EditorGUILayout.LabelField(LocalizationManager.L("update.available", s_latestVersion), s_updateStyle);
                 }
                 GUILayout.Space(4);
             }

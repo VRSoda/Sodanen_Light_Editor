@@ -5,7 +5,7 @@ using static Brightness.Localization.Loc;
 
 namespace Brightness.Utility
 {
-    public partial class SodanenEditor
+    public partial class SodanenMaterialEditor
     {
         private void DrawCustomMaterialSectionContent()
         {

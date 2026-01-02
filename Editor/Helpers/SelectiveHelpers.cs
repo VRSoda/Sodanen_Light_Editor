@@ -1,14 +1,68 @@
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
+using VRC.SDK3.Avatars.Components;
 using VRC.SDK3.Avatars.ScriptableObjects;
 using nadena.dev.modular_avatar.core;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using static Brightness.Localization.Loc;
 
 namespace Brightness.Utility
 {
+    /// <summary>
+    /// 아바타 검색 및 선택 Helper
+    /// </summary>
+    public static class AvatarHelper
+    {
+        /// <summary>
+        /// 씬에서 아바타 목록을 가져옵니다.
+        /// </summary>
+        public static VRCAvatarDescriptor[] GetSceneAvatars()
+        {
+            return Resources.FindObjectsOfTypeAll<VRCAvatarDescriptor>()
+                .Where(a => a.gameObject.scene.isLoaded)
+                .OrderByDescending(a => a.gameObject.activeInHierarchy)
+                .ThenBy(a => a.gameObject.name)
+                .ToArray();
+        }
+
+        /// <summary>
+        /// 아바타 드롭다운용 이름 배열을 생성합니다.
+        /// </summary>
+        public static string[] GetAvatarNames(VRCAvatarDescriptor[] avatars)
+        {
+            var names = new string[avatars.Length + 1];
+            names[0] = L("avatar.select_dropdown");
+
+            for (int i = 0; i < avatars.Length; i++)
+            {
+                var go = avatars[i].gameObject;
+                names[i + 1] = go.activeInHierarchy ? go.name : $"{go.name} (Off)";
+            }
+
+            return names;
+        }
+
+        /// <summary>
+        /// 현재 선택된 아바타의 인덱스를 찾습니다.
+        /// </summary>
+        public static int FindAvatarIndex(VRCAvatarDescriptor[] avatars, GameObject targetAvatar)
+        {
+            if (targetAvatar == null) return 0;
+
+            for (int i = 0; i < avatars.Length; i++)
+            {
+                if (avatars[i].gameObject == targetAvatar)
+                    return i + 1;
+            }
+
+            return 0;
+        }
+    }
+
     /// <summary>
     /// 선택적 애니메이션 클립 생성 Helper
     /// </summary>

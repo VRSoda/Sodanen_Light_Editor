@@ -8,7 +8,7 @@ using static Brightness.Localization.Loc;
 
 namespace Brightness.Utility
 {
-    public partial class SodanenEditor : EditorWindow
+    public partial class SodanenMaterialEditor : EditorWindow
     {
         #region Fields - Core
 
@@ -24,33 +24,38 @@ namespace Brightness.Utility
 
         #endregion
 
-        #region Fields - Feature System
+        #region Fields - Unify System
 
-        private readonly FeatureToggles _featureToggles = new();
-        private readonly FeatureMaterialSelections _materialSelections = new();
-        private readonly List<FeatureInfo> _lightFeatures;
-        private readonly List<FeatureInfo> _shadowFeatures;
+        private UnifySettings _unifySettings = new();
+        private readonly ShadowUnifyUIState _shadowUIState = new();
+        private List<MaterialPropertyInfo> _materialDifferences = new();
+        private readonly List<ShadowGroupOverride> _shadowGroups = new();
+        private readonly List<CustomMaterialShadowEntry> _customMaterialEntries = new();
+
+        #endregion
+
+        #region Fields - UI State
+
+        private bool _showUnifySection = true;
+        private bool _unifyEnableShadowGroup = true;
+        private bool _showDifferences;
+        private bool _showCustomMaterialSection = true;
+        private GUIStyle _diffStyle;
 
         #endregion
 
         #region Constants
 
         private const float SectionSpacing = 6f;
-        private const float ApplyButtonHeight = 36f;
 
         #endregion
 
         #region Initialization
 
-        public SodanenEditor()
-        {
-            _lightFeatures = CreateLightFeatures();
-            _shadowFeatures = CreateShadowFeatures();
-        }
-
         private void OnEnable()
         {
             LocalizationManager.CheckAndSyncLilToonLanguage();
+            InitPresets();
             RefreshSceneAvatars();
         }
 
@@ -81,12 +86,20 @@ namespace Brightness.Utility
             _selectedAvatarIndex = AvatarHelper.FindAvatarIndex(_sceneAvatars, _targetAvatar);
         }
 
-        [MenuItem("Sodanen/Light Editor")]
+        [MenuItem("Sodanen/Material Editor")]
         public static void ShowWindow()
         {
-            var window = GetWindow<SodanenEditor>("Sodanen Light Editor");
-            window.minSize = new Vector2(420, 400);
-            window.maxSize = new Vector2(600, 800);
+            var window = GetWindow<SodanenMaterialEditor>("Sodanen Material Editor");
+            window.minSize = new Vector2(420, 500);
+            window.maxSize = new Vector2(600, 1200);
+        }
+
+        private void InitStyles()
+        {
+            _diffStyle ??= new GUIStyle(EditorStyles.miniLabel)
+            {
+                normal = { textColor = new Color(1f, 0.9f, 0.4f) }
+            };
         }
 
         #endregion
@@ -95,22 +108,23 @@ namespace Brightness.Utility
 
         private void OnGUI()
         {
+            InitStyles();
             LocalizationManager.CheckAndSyncLilToonLanguage();
             SodanenEditorUI.DrawBackground(position);
 
             _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
             {
                 GUILayout.Space(6);
-                SodanenEditorUI.DrawHeader();
+                SodanenEditorUI.DrawHeader("Sodanen Material Editor");
                 GUILayout.Space(10);
 
                 DrawAvatarSection();
                 GUILayout.Space(SectionSpacing);
 
-                DrawFeatureSection();
-                GUILayout.Space(10);
+                DrawPresetSection();
+                GUILayout.Space(SectionSpacing);
 
-                DrawApplyButton();
+                DrawMaterialSettingsContent();
                 GUILayout.Space(8);
             }
             EditorGUILayout.EndScrollView();
@@ -184,34 +198,19 @@ namespace Brightness.Utility
 
         #endregion
 
-        #region Section - Apply Button
+        #region Section - Material Settings
 
-        private void DrawApplyButton()
+        private void DrawMaterialSettingsContent()
         {
-            var canApply = CanApplySettings();
-
-            using (new EditorGUI.DisabledScope(!canApply))
+            if (_targetAvatar == null || _allMaterialPaths.Count == 0)
             {
-                if (SodanenEditorUI.DrawButton(L("button.apply"), SodanenEditorUI.AccentColor, ApplyButtonHeight))
-                {
-                    ApplyAllSettings();
-                }
+                SodanenEditorUI.DrawStatusBox(L("avatar.select"), SodanenEditorUI.SubtleGray);
+                return;
             }
 
-            if (!canApply)
-            {
-                var message = _targetAvatar == null
-                    ? L("button.select_avatar")
-                    : L("button.select_feature");
-                EditorGUILayout.LabelField(message, SodanenEditorUI.InfoStyle);
-            }
-        }
-
-        private bool CanApplySettings()
-        {
-            return _targetAvatar != null
-                   && _targetAvatar.GetComponent<VRCAvatarDescriptor>() != null
-                   && _featureToggles.HasAnyFeatureSelected();
+            DrawUnifySectionContent();
+            GUILayout.Space(SectionSpacing);
+            DrawCustomMaterialSectionContent();
         }
 
         #endregion
@@ -221,23 +220,35 @@ namespace Brightness.Utility
         private void RefreshMaterialList()
         {
             _allMaterialPaths.Clear();
-            _materialSelections.Clear();
 
             if (_targetAvatar == null) return;
 
             _allMaterialPaths = ShaderHelper.GetCompatibleShaderPaths(_targetAvatar);
-            _materialSelections.SetAll(_allMaterialPaths, true);
+
+            foreach (var group in _shadowGroups)
+                group.RefreshAvailableMaterials(_targetAvatar);
         }
 
-        private void ApplyAllSettings()
+        private HashSet<Material> CollectExcludedMaterials()
         {
-            SodanenEditorLogic.ApplyBrightnessControl(new BrightnessControlParameters
-            {
-                TargetAvatar = _targetAvatar,
-                Toggles = _featureToggles,
-                Selections = _materialSelections,
-                AllMaterialPaths = _allMaterialPaths
-            });
+            var excludeMaterials = new HashSet<Material>(_shadowGroups.SelectMany(g => g.GetSelectedMaterials()));
+
+            foreach (var entry in _customMaterialEntries.Where(e => e.Material != null))
+                excludeMaterials.Add(entry.Material);
+
+            return excludeMaterials;
+        }
+
+        private void ApplyGroupOverrides()
+        {
+            foreach (var group in _shadowGroups)
+                group.ApplyToSelectedMaterials();
+        }
+
+        private void ApplyCustomMaterialSettings()
+        {
+            foreach (var entry in _customMaterialEntries.Where(e => e.Material != null))
+                entry.ApplyToMaterial();
         }
 
         #endregion

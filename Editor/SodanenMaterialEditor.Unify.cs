@@ -6,7 +6,7 @@ using static Brightness.Localization.Loc;
 
 namespace Brightness.Utility
 {
-    public partial class SodanenEditor
+    public partial class SodanenMaterialEditor
     {
         #region Fields - Unify
 
@@ -368,7 +368,6 @@ namespace Brightness.Utility
 
         private void ExecuteNonDestructiveDuplicate(bool applyUnify)
         {
-            // 개별 마테리얼 설정은 제외하지 않고 복제 후 별도 적용
             var result = MaterialUnifyHelper.DuplicateMaterialsNonDestructive(
                 _targetAvatar,
                 applyUnifySettings: applyUnify,
@@ -380,7 +379,6 @@ namespace Brightness.Utility
                 _targetAvatar = result.DuplicatedAvatar;
                 RefreshMaterialList();
 
-                // 복제된 아바타에 그룹 오버라이드 및 커스텀 마테리얼 설정 적용
                 ApplyGroupOverridesToDuplicatedAvatar(result.DuplicatedAvatar);
                 ApplyCustomMaterialSettingsToDuplicatedAvatar(result.DuplicatedAvatar);
 

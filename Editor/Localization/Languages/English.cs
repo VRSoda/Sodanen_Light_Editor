@@ -14,6 +14,7 @@ namespace Brightness.Localization
             { "avatar.title", "Avatar" },
             { "avatar.target", "Target" },
             { "avatar.select", "Please select an avatar" },
+            { "avatar.select_dropdown", "-- Select Avatar --" },
             { "avatar.material_count", "lilToon Materials: {0}" },
             { "avatar.no_descriptor", "No VRCAvatarDescriptor" },
 
@@ -36,6 +37,7 @@ namespace Brightness.Localization
 
             // ===== Material Settings =====
             { "material.title", "Material Settings" },
+            { "material.window_title", "Material Editor" },
             { "material.unify_toggle", "Unify Properties / Individual Control" },
             { "material.select_all", "All" },
             { "material.deselect_all", "None" },
@@ -158,6 +160,26 @@ namespace Brightness.Localization
             { "button.apply", "Apply" },
             { "button.select_avatar", "Please select an avatar" },
             { "button.select_feature", "Please select at least one feature" },
+
+            // ===== Cloth Editor =====
+            { "cloth.title", "Toggle Groups" },
+            { "cloth.selected_count", "Items: {0}" },
+            { "cloth.no_items", "Add a group to start" },
+            { "cloth.settings", "Settings" },
+            { "cloth.saved_state", "Save State" },
+            { "cloth.apply", "Create Toggles" },
+            { "cloth.select_items", "Please add items" },
+            { "cloth.apply_complete", "{0} cloth toggles have been created!" },
+            { "cloth.drop_here", "Drop items here" },
+            { "cloth.default_index", "Default" },
+            { "cloth.target_menu", "Target Menu" },
+            { "cloth.add_all_off", "Add All OFF" },
+            { "cloth.toggle_name", "Parameter" },
+            { "cloth.save_folder", "Save Folder" },
+            { "cloth.default_folder", "(Default location)" },
+            { "cloth.select_folder", "Select Save Folder" },
+            { "cloth.folder_error", "Only folders inside Assets can be selected." },
+            { "cloth.new_menu", "Create New Menu" },
 
             // ===== Update =====
             { "update.available", "→ v{0} update available (Check VCC)" },

@@ -6,7 +6,7 @@ using static Brightness.Localization.Loc;
 
 namespace Brightness.Utility
 {
-    public partial class SodanenEditor
+    public partial class SodanenMaterialEditor
     {
         private bool _showPresetSection = false;
         private int _selectedPresetIndex = -1;

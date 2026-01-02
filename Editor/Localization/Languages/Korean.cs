@@ -14,6 +14,7 @@ namespace Brightness.Localization
             { "avatar.title", "아바타" },
             { "avatar.target", "대상" },
             { "avatar.select", "아바타를 선택하세요" },
+            { "avatar.select_dropdown", "-- 아바타 선택 --" },
             { "avatar.material_count", "lilToon 마테리얼: {0}개" },
             { "avatar.no_descriptor", "VRCAvatarDescriptor 없음" },
 
@@ -36,6 +37,7 @@ namespace Brightness.Localization
 
             // ===== Material Settings =====
             { "material.title", "마테리얼 설정" },
+            { "material.window_title", "Sodanen Material Editor" },
             { "material.unify_toggle", "속성 통일 / 개별 조절" },
             { "material.select_all", "전체" },
             { "material.deselect_all", "해제" },
@@ -158,6 +160,26 @@ namespace Brightness.Localization
             { "button.apply", "적용하기" },
             { "button.select_avatar", "아바타를 선택해주세요" },
             { "button.select_feature", "최소 하나의 기능을 선택해주세요" },
+
+            // ===== Cloth Editor =====
+            { "cloth.title", "토글 그룹" },
+            { "cloth.selected_count", "등록된 아이템: {0}개" },
+            { "cloth.no_items", "그룹을 추가해주세요" },
+            { "cloth.settings", "설정" },
+            { "cloth.saved_state", "상태 저장" },
+            { "cloth.apply", "Toggle 생성" },
+            { "cloth.select_items", "아이템을 추가해주세요" },
+            { "cloth.apply_complete", "{0}개의 의상 토글이 생성되었습니다!" },
+            { "cloth.drop_here", "여기에 드래그 앤 드롭" },
+            { "cloth.default_index", "기본값" },
+            { "cloth.target_menu", "대상 메뉴" },
+            { "cloth.add_all_off", "All OFF 추가" },
+            { "cloth.toggle_name", "파라미터" },
+            { "cloth.save_folder", "저장 폴더" },
+            { "cloth.default_folder", "(기본 위치)" },
+            { "cloth.select_folder", "저장 폴더 선택" },
+            { "cloth.folder_error", "Assets 폴더 내부만 선택할 수 있습니다." },
+            { "cloth.new_menu", "새 메뉴 생성" },
 
             // ===== Update =====
             { "update.available", "→ v{0} 업데이트 가능 (VCC 확인)" },
