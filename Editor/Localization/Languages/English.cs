@@ -17,6 +17,8 @@ namespace Brightness.Localization
             { "avatar.select_dropdown", "-- Select Avatar --" },
             { "avatar.material_count", "lilToon Materials: {0}" },
             { "avatar.no_descriptor", "No VRCAvatarDescriptor" },
+            { "avatar.menu_location", "Menu" },
+            { "avatar.menu_root", "Root Menu" },
 
             // ===== Feature Section =====
             { "feature.title", "Feature Selection" },

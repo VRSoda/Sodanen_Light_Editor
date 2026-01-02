@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using VRC.SDK3.Avatars.Components;
+using VRC.SDK3.Avatars.ScriptableObjects;
 using Brightness.Localization;
 using static Brightness.Localization.Loc;
 
@@ -21,6 +22,12 @@ namespace Brightness.Utility
         private VRCAvatarDescriptor[] _sceneAvatars = new VRCAvatarDescriptor[0];
         private string[] _avatarNames = new string[0];
         private int _selectedAvatarIndex = -1;
+
+        // 메뉴 위치 드롭다운용
+        private List<VRCExpressionsMenu> _avatarMenus = new();
+        private string[] _menuNames = new string[0];
+        private int _selectedMenuIndex = 0;
+        private VRCExpressionsMenu _targetMenu;
 
         #endregion
 
@@ -124,6 +131,7 @@ namespace Brightness.Utility
 
             _lastAvatar = _targetAvatar;
             RefreshMaterialList();
+            RefreshMenuList();
         }
 
         #endregion
@@ -135,6 +143,8 @@ namespace Brightness.Utility
             SodanenEditorUI.DrawSectionBox(L("avatar.title"), () =>
             {
                 DrawAvatarField();
+                GUILayout.Space(4);
+                DrawMenuLocationField();
                 GUILayout.Space(4);
                 DrawAvatarStatus();
             });
@@ -164,6 +174,69 @@ namespace Brightness.Utility
                 RefreshSceneAvatars();
             }
             EditorGUILayout.EndHorizontal();
+        }
+
+        private void DrawMenuLocationField()
+        {
+            if (_targetAvatar == null) return;
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(L("avatar.menu_location"), EditorStyles.boldLabel, GUILayout.Width(55));
+
+            var newIndex = EditorGUILayout.Popup(_selectedMenuIndex, _menuNames);
+            if (newIndex != _selectedMenuIndex)
+            {
+                _selectedMenuIndex = newIndex;
+                _targetMenu = newIndex > 0 ? _avatarMenus[newIndex - 1] : null;
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private void RefreshMenuList()
+        {
+            _avatarMenus.Clear();
+            _selectedMenuIndex = 0;
+            _targetMenu = null;
+
+            if (_targetAvatar == null)
+            {
+                _menuNames = new[] { L("avatar.menu_root") };
+                return;
+            }
+
+            var descriptor = _targetAvatar.GetComponent<VRCAvatarDescriptor>();
+            if (descriptor == null || descriptor.expressionsMenu == null)
+            {
+                _menuNames = new[] { L("avatar.menu_root") };
+                return;
+            }
+
+            // 루트 메뉴와 서브메뉴들 수집
+            CollectMenus(descriptor.expressionsMenu);
+
+            // 드롭다운 옵션 생성
+            var names = new List<string> { L("avatar.menu_root") };
+            foreach (var menu in _avatarMenus)
+            {
+                names.Add(menu.name);
+            }
+            _menuNames = names.ToArray();
+        }
+
+        private void CollectMenus(VRCExpressionsMenu menu)
+        {
+            if (menu == null || _avatarMenus.Contains(menu)) return;
+
+            _avatarMenus.Add(menu);
+
+            // 서브메뉴 수집
+            foreach (var control in menu.controls)
+            {
+                if (control.type == VRCExpressionsMenu.Control.ControlType.SubMenu && control.subMenu != null)
+                {
+                    CollectMenus(control.subMenu);
+                }
+            }
         }
 
         private void DrawAvatarStatus()
@@ -236,7 +309,8 @@ namespace Brightness.Utility
                 TargetAvatar = _targetAvatar,
                 Toggles = _featureToggles,
                 Selections = _materialSelections,
-                AllMaterialPaths = _allMaterialPaths
+                AllMaterialPaths = _allMaterialPaths,
+                TargetMenu = _targetMenu
             });
         }
 

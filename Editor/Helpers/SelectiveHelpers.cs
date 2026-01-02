@@ -349,6 +349,7 @@ namespace Brightness.Utility
         public static void SetupSelectiveBrightnessObject(
             GameObject avatar,
             AnimatorController controller,
+            VRCExpressionsMenu targetMenu,
             bool minLight,
             bool maxLight,
             bool backLight,
@@ -364,7 +365,7 @@ namespace Brightness.Utility
             brightnessObject.transform.SetParent(avatar.transform);
 
             SetupMergeAnimator(brightnessObject, controller);
-            SetupMenuInstaller(brightnessObject);
+            SetupMenuInstaller(brightnessObject, targetMenu);
             SetupSelectiveParameters(brightnessObject, minLight, maxLight, backLight, shadow, shadowXAngle, shadowYAngle);
         }
 
@@ -377,11 +378,17 @@ namespace Brightness.Utility
             maAnimator.matchAvatarWriteDefaults = true;
         }
 
-        private static void SetupMenuInstaller(GameObject target)
+        private static void SetupMenuInstaller(GameObject target, VRCExpressionsMenu targetMenu)
         {
             var maMenu = target.AddComponent<ModularAvatarMenuInstaller>();
             maMenu.menuToAppend = AssetDatabase.LoadAssetAtPath<VRCExpressionsMenu>(
                 BrightnessConstants.SETTINGS_ASSET_PATH);
+
+            // 선택된 메뉴가 있으면 해당 메뉴에 설치
+            if (targetMenu != null)
+            {
+                maMenu.installTargetMenu = targetMenu;
+            }
         }
 
         private static void SetupSelectiveParameters(GameObject target,

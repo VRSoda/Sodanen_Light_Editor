@@ -17,6 +17,8 @@ namespace Brightness.Localization
             { "avatar.select_dropdown", "-- 아바타 선택 --" },
             { "avatar.material_count", "lilToon 마테리얼: {0}개" },
             { "avatar.no_descriptor", "VRCAvatarDescriptor 없음" },
+            { "avatar.menu_location", "메뉴" },
+            { "avatar.menu_root", "루트 메뉴" },
 
             // ===== Feature Section =====
             { "feature.title", "기능 선택" },

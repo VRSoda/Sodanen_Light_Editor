@@ -17,6 +17,8 @@ namespace Brightness.Localization
             { "avatar.select_dropdown", "-- 选择角色 --" },
             { "avatar.material_count", "lilToon 材质: {0}个" },
             { "avatar.no_descriptor", "无 VRCAvatarDescriptor" },
+            { "avatar.menu_location", "菜单" },
+            { "avatar.menu_root", "根菜单" },
 
             // ===== Feature Section =====
             { "feature.title", "功能选择" },

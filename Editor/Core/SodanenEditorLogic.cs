@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using VRC.SDK3.Avatars.Components;
+using VRC.SDK3.Avatars.ScriptableObjects;
 using static Brightness.Localization.Loc;
 
 namespace Brightness.Utility
@@ -13,6 +14,7 @@ namespace Brightness.Utility
         public FeatureToggles Toggles { get; set; }
         public FeatureMaterialSelections Selections { get; set; }
         public List<string> AllMaterialPaths { get; set; }
+        public VRCExpressionsMenu TargetMenu { get; set; }
     }
 
     public static class SodanenEditorLogic
@@ -52,7 +54,7 @@ namespace Brightness.Utility
                 useMinLight, useMaxLight, useBackLight, useShadow, useShadowX, useShadowY);
 
             SelectiveModularAvatarHelper.SetupSelectiveBrightnessObject(
-                parameters.TargetAvatar, controller,
+                parameters.TargetAvatar, controller, parameters.TargetMenu,
                 useMinLight, useMaxLight, useBackLight, useShadow, useShadowX, useShadowY);
 
             var featureLogs = new List<string>();
