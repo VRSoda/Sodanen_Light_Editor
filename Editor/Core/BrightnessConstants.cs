@@ -1,3 +1,5 @@
+using UnityEditor;
+
 namespace Brightness.Utility
 {
     /// <summary>
@@ -5,27 +7,46 @@ namespace Brightness.Utility
     /// </summary>
     public static class BrightnessConstants
     {
-        // 기본 경로
-        public const string BASE_PATH = "Assets/SodanenLightEditor/";
-        public const string ANIMATION_PATH = BASE_PATH + "Animation/";
-        public const string CREATE_PATH = BASE_PATH + "Created/";
+        // 기본 경로 (Assets 또는 Packages 자동 감지)
+        private const string ASSETS_PATH = "Assets/SodanenLightEditor/";
+        private const string PACKAGES_PATH = "Packages/com.sodanen.sodanenlighteditor/";
+
+        private static string _basePath;
+        public static string BASE_PATH
+        {
+            get
+            {
+                if (_basePath == null)
+                {
+                    // Packages 경로에 있는지 먼저 확인
+                    if (AssetDatabase.IsValidFolder(PACKAGES_PATH.TrimEnd('/')))
+                        _basePath = PACKAGES_PATH;
+                    else
+                        _basePath = ASSETS_PATH;
+                }
+                return _basePath;
+            }
+        }
+
+        public static string ANIMATION_PATH => BASE_PATH + "Animation/";
+        public const string CREATE_PATH = "Assets/SodanenLightEditor/Created/";
 
         // 오브젝트 및 쉐이더 설정
         public const string OBJECT_NAME = "BrightnessControl";
         public const string SHADER_SHORT_NAME = "lil";
 
         // 에셋 경로
-        public const string SETTINGS_ASSET_PATH = BASE_PATH + "BrightnessSetting.asset";
-        public const string BRIGHTNESS_CONTROLLER_PATH = ANIMATION_PATH + "BrightnessController.controller";
-        public const string DUMMY_ANIM_PATH = ANIMATION_PATH + "Dummy.anim";
+        public static string SETTINGS_ASSET_PATH => BASE_PATH + "BrightnessSetting.asset";
+        public static string BRIGHTNESS_CONTROLLER_PATH => ANIMATION_PATH + "BrightnessController.controller";
+        public static string DUMMY_ANIM_PATH => ANIMATION_PATH + "Dummy.anim";
 
         // 애니메이션 클립 경로
-        public const string MIN_LIGHT_ANIM = ANIMATION_PATH + "MinLight.anim";
-        public const string MAX_LIGHT_ANIM = ANIMATION_PATH + "MaxLight.anim";
-        public const string BACK_LIGHT_ANIM = ANIMATION_PATH + "BackLight.anim";
-        public const string SHADOW_ANGLE_ANIM = ANIMATION_PATH + "Shadow_Angle.anim";
-        public const string SHADOW_XANGLE_ANIM = ANIMATION_PATH + "Shadow_XAngle.anim";
-        public const string SHADOW_YANGLE_ANIM = ANIMATION_PATH + "Shadow_YAngle.anim";
+        public static string MIN_LIGHT_ANIM => ANIMATION_PATH + "MinLight.anim";
+        public static string MAX_LIGHT_ANIM => ANIMATION_PATH + "MaxLight.anim";
+        public static string BACK_LIGHT_ANIM => ANIMATION_PATH + "BackLight.anim";
+        public static string SHADOW_ANGLE_ANIM => ANIMATION_PATH + "Shadow_Angle.anim";
+        public static string SHADOW_XANGLE_ANIM => ANIMATION_PATH + "Shadow_XAngle.anim";
+        public static string SHADOW_YANGLE_ANIM => ANIMATION_PATH + "Shadow_YAngle.anim";
 
         // 쉐이더 프로퍼티 이름
         public static class ShaderProperties
