@@ -6,7 +6,9 @@
     "VRC.SDK3A.Editor",
     "VRC.SDKBase",
     "VRC.SDKBase.Editor",
-    "nadena.dev.modular-avatar.core"
+    "nadena.dev.modular-avatar.core",
+    "nadena.dev.ndmf",
+    "Sodanen.LightControl.Runtime"
   ],
   "includePlatforms": [
     "Editor"
@@ -22,6 +24,11 @@
       "name": "nadena.dev.modular-avatar",
       "expression": "",
       "define": "MODULAR_AVATAR"
+    },
+    {
+      "name": "nadena.dev.ndmf",
+      "expression": "",
+      "define": "NDMF"
     }
   ],
   "noEngineReferences": false
