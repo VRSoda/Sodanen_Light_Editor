@@ -10,8 +10,8 @@ namespace Brightness.Utility
     /// </summary>
     public static class SodanenLightMenuItems
     {
-        private const string MENU_PATH = "GameObject/Sodanen/Add Light Control";
-        private const string COMPONENT_MENU_PATH = "Sodanen/Add Light Control to Avatar";
+        private const string MENU_PATH = "GameObject/Sodanen/Light Control/Add to Selected Avatar";
+        private const string COMPONENT_MENU_PATH = "Sodanen/Light Control/Add to Avatar";
 
         /// <summary>
         /// 선택된 아바타에 Light Control 추가
@@ -22,7 +22,7 @@ namespace Brightness.Utility
             var selection = Selection.activeGameObject;
             if (selection == null)
             {
-                EditorUtility.DisplayDialog("오류", "먼저 아바타를 선택해주세요.", "확인");
+                EditorUtility.DisplayDialog("Sodanen Light Control", "먼저 아바타 또는 아바타 내부 오브젝트를 선택해주세요.", "확인");
                 return;
             }
 
@@ -30,7 +30,7 @@ namespace Brightness.Utility
             var avatarRoot = FindAvatarRoot(selection);
             if (avatarRoot == null)
             {
-                EditorUtility.DisplayDialog("오류", "선택된 오브젝트가 VRChat 아바타 내부에 없습니다.", "확인");
+                EditorUtility.DisplayDialog("Sodanen Light Control", "선택된 오브젝트가 VRChat 아바타 내부에 없습니다.", "확인");
                 return;
             }
 
@@ -38,7 +38,7 @@ namespace Brightness.Utility
             var existing = avatarRoot.GetComponentInChildren<SodanenLightControl>();
             if (existing != null)
             {
-                EditorUtility.DisplayDialog("알림", "이미 Light Control이 존재합니다.", "확인");
+                EditorUtility.DisplayDialog("Sodanen Light Control", "이미 Light Control 컴포넌트가 존재합니다.", "확인");
                 Selection.activeObject = existing.gameObject;
                 return;
             }
@@ -75,7 +75,7 @@ namespace Brightness.Utility
 
             if (avatars.Length == 0)
             {
-                EditorUtility.DisplayDialog("오류", "씬에 VRChat 아바타가 없습니다.", "확인");
+                EditorUtility.DisplayDialog("Sodanen Light Control", "씬에 VRChat 아바타가 없습니다.", "확인");
                 return;
             }
 
@@ -103,7 +103,7 @@ namespace Brightness.Utility
             var existing = avatarRoot.GetComponentInChildren<SodanenLightControl>();
             if (existing != null)
             {
-                EditorUtility.DisplayDialog("알림", $"'{avatarRoot.name}'에 이미 Light Control이 존재합니다.", "확인");
+                EditorUtility.DisplayDialog("Sodanen Light Control", $"'{avatarRoot.name}'에 이미 Light Control 컴포넌트가 존재합니다.", "확인");
                 Selection.activeObject = existing.gameObject;
                 return;
             }

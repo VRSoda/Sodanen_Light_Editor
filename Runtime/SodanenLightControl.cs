@@ -46,9 +46,45 @@ namespace Sodanen.LightControl
         [Tooltip("역광 조절 기능 활성화")]
         public bool enableBackLight = true;
 
-        [Tooltip("역광 값 (0~1)")]
+        [Tooltip("백라이트 색상")]
+        public Color backLightColor = Color.white;
+
+        [Tooltip("EX 메뉴 라디얼로 백라이트 색을 바꿈 (0=흰색 → 무지개). 켜면 위 색상값은 무시됨")]
+        public bool enableBackLightColorChange = false;
+
+        [Tooltip("백라이트 투명도")]
         [Range(0f, 1f)]
-        public float backLightValue = 0.35f;
+        public float backLightAlpha = 1f;
+
+        [Tooltip("메인 컬러 강도")]
+        [Range(0f, 1f)]
+        public float backLightMainStrength = 0f;
+
+        [Tooltip("그림자를 받는")]
+        public bool backLightReceiveShadow = true;
+
+        [Tooltip("후면 무효화")]
+        public bool backLightBackfaceMask = true;
+
+        [Tooltip("노멀 맵 강도")]
+        [Range(0f, 1f)]
+        public float backLightNormalStrength = 0f;
+
+        [Tooltip("범위")]
+        [Range(0f, 1f)]
+        public float backLightBorder = 0.65f;
+
+        [Tooltip("흐리게")]
+        [Range(0f, 1f)]
+        public float backLightBlur = 0.05f;
+
+        [Tooltip("지향성")]
+        [Range(0f, 10f)]
+        public float backLightDirectivity = 5f;
+
+        [Tooltip("뷰 방향의 영향도")]
+        [Range(0f, 1f)]
+        public float backLightViewStrength = 0f;
 
         [Header("Shadow")]
         [Tooltip("그림자 강도 조절 기능 활성화")]

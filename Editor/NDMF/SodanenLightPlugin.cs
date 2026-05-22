@@ -24,10 +24,17 @@ namespace Brightness.Utility
         // 셰이더 프로퍼티 이름
         private const string PROP_MIN_LIGHT = "material._LightMinLimit";
         private const string PROP_MAX_LIGHT = "material._LightMaxLimit";
-        private const string PROP_BACK_LIGHT = "material._BacklightBorder";
+        private const string PROP_USE_BACK_LIGHT = "material._UseBacklight";
+        private const string PROP_BACK_LIGHT_COLOR = "material._BacklightColor";
+        private const string PROP_BACK_LIGHT_MAIN_STRENGTH = "material._BacklightMainStrength";
+        private const string PROP_BACK_LIGHT_RECEIVE_SHADOW = "material._BacklightReceiveShadow";
+        private const string PROP_BACK_LIGHT_BACKFACE_MASK = "material._BacklightBackfaceMask";
+        private const string PROP_BACK_LIGHT_NORMAL_STRENGTH = "material._BacklightNormalStrength";
+        private const string PROP_BACK_LIGHT_BORDER = "material._BacklightBorder";
+        private const string PROP_BACK_LIGHT_BLUR = "material._BacklightBlur";
+        private const string PROP_BACK_LIGHT_DIRECTIVITY = "material._BacklightDirectivity";
+        private const string PROP_BACK_LIGHT_VIEW_STRENGTH = "material._BacklightViewStrength";
         private const string PROP_SHADOW = "material._ShadowStrength";
-        private const string PROP_SHADOW_X = "material._LightDirection.x";
-        private const string PROP_SHADOW_Y = "material._LightDirection.y";
 
         protected override void Configure()
         {
@@ -101,7 +108,17 @@ namespace Brightness.Utility
             if (component.enableMaxLight)
                 Debug.Log($"  MaxLight: {component.maxLightRange.x} → {component.maxLightRange.y}");
             if (component.enableBackLight)
-                Debug.Log($"  BackLight: 1 → {component.backLightValue}");
+            {
+                Debug.Log($"  BackLight Color: {component.backLightColor} / Alpha: {component.backLightAlpha}");
+                Debug.Log($"  BackLight MainStrength: {component.backLightMainStrength}");
+                Debug.Log($"  BackLight ReceiveShadow: {component.backLightReceiveShadow}");
+                Debug.Log($"  BackLight BackfaceMask: {component.backLightBackfaceMask}");
+                Debug.Log($"  BackLight NormalStrength: {component.backLightNormalStrength}");
+                Debug.Log($"  BackLight Border: {component.backLightBorder}");
+                Debug.Log($"  BackLight Blur: {component.backLightBlur}");
+                Debug.Log($"  BackLight Directivity: {component.backLightDirectivity}");
+                Debug.Log($"  BackLight ViewStrength: {component.backLightViewStrength}");
+            }
             if (component.enableShadow)
             {
                 Debug.Log($"  Shadow (기본): {component.shadowRange.x} → {component.shadowRange.y}");
@@ -127,6 +144,8 @@ namespace Brightness.Utility
                 LogClipInfo("MaxLight", clipSet.MaxLight);
             if (clipSet.BackLight != null)
                 LogClipInfo("BackLight", clipSet.BackLight);
+            if (clipSet.BackLightHue != null)
+                LogClipInfo("BackLightHue", clipSet.BackLightHue);
             if (clipSet.Shadow != null)
                 LogClipInfo("Shadow", clipSet.Shadow);
             if (clipSet.ShadowXAngle != null)
@@ -191,9 +210,11 @@ namespace Brightness.Utility
                 clipSet.MaxLight = CreateDynamicClip(avatar, targetPaths, PROP_MAX_LIGHT,
                     component.maxLightRange.x, component.maxLightRange.y);
 
-            // BackLight는 1 → 설정값 범위 (lilToon에서 1=역광없음, 0=역광최대)
             if (component.enableBackLight)
-                clipSet.BackLight = CreateDynamicClip(avatar, targetPaths, PROP_BACK_LIGHT, 1f, component.backLightValue);
+                clipSet.BackLight = CreateBacklightClip(avatar, targetPaths, component);
+
+            if (component.enableBackLight && component.enableBackLightColorChange)
+                clipSet.BackLightHue = CreateBacklightHueClip(avatar, targetPaths);
 
             if (component.enableShadow)
                 clipSet.Shadow = CreateShadowClipWithOverrides(avatar, targetPaths, component);
@@ -300,6 +321,127 @@ namespace Brightness.Utility
             return clip;
         }
 
+        private AnimationClip CreateBacklightClip(
+            GameObject avatar,
+            List<string> targetPaths,
+            SodanenLightControl component)
+        {
+            var clip = new AnimationClip();
+            var avatarTransform = avatar.transform;
+            var color = component.backLightColor;
+
+            foreach (var targetPath in targetPaths)
+            {
+                var targetTransform = avatarTransform.Find(targetPath);
+                if (targetTransform == null) continue;
+
+                System.Type rendererType = null;
+                if (targetTransform.GetComponent<SkinnedMeshRenderer>() != null)
+                    rendererType = typeof(SkinnedMeshRenderer);
+                else if (targetTransform.GetComponent<MeshRenderer>() != null)
+                    rendererType = typeof(MeshRenderer);
+
+                if (rendererType == null) continue;
+
+                SetConstantCurve(clip, rendererType, targetPath, PROP_USE_BACK_LIGHT, 1f);
+                // 색상변경(Hue)을 켜면 r/g/b는 별도 Hue 레이어가 구동하므로 여기서는 쓰지 않는다
+                if (!component.enableBackLightColorChange)
+                {
+                    SetConstantCurve(clip, rendererType, targetPath, $"{PROP_BACK_LIGHT_COLOR}.r", color.r);
+                    SetConstantCurve(clip, rendererType, targetPath, $"{PROP_BACK_LIGHT_COLOR}.g", color.g);
+                    SetConstantCurve(clip, rendererType, targetPath, $"{PROP_BACK_LIGHT_COLOR}.b", color.b);
+                }
+                SetConstantCurve(clip, rendererType, targetPath, $"{PROP_BACK_LIGHT_COLOR}.a", component.backLightAlpha);
+
+                // 상세값은 설정값 그대로 고정. 'Back Light' 라디얼은 범위(Border)만 조절.
+                // lilToon은 _BacklightBorder를 (1 - UI값)으로 저장하므로 반전해서 기록.
+                // 라디얼 0% → UI 범위 0 (raw 1), 100% → UI 범위 = 설정값 (raw 1-설정값)
+                SetConstantCurve(clip, rendererType, targetPath, PROP_BACK_LIGHT_MAIN_STRENGTH, component.backLightMainStrength);
+                SetConstantCurve(clip, rendererType, targetPath, PROP_BACK_LIGHT_RECEIVE_SHADOW, component.backLightReceiveShadow ? 1f : 0f);
+                SetConstantCurve(clip, rendererType, targetPath, PROP_BACK_LIGHT_BACKFACE_MASK, component.backLightBackfaceMask ? 1f : 0f);
+                SetConstantCurve(clip, rendererType, targetPath, PROP_BACK_LIGHT_NORMAL_STRENGTH, component.backLightNormalStrength);
+                SetDynamicCurve(clip, rendererType, targetPath, PROP_BACK_LIGHT_BORDER, 1f, 1f - component.backLightBorder);
+                SetConstantCurve(clip, rendererType, targetPath, PROP_BACK_LIGHT_BLUR, component.backLightBlur);
+                SetConstantCurve(clip, rendererType, targetPath, PROP_BACK_LIGHT_DIRECTIVITY, component.backLightDirectivity);
+                SetConstantCurve(clip, rendererType, targetPath, PROP_BACK_LIGHT_VIEW_STRENGTH, component.backLightViewStrength);
+            }
+
+            return clip;
+        }
+
+        /// <summary>
+        /// 백라이트 색상 Hue 라디얼 클립 생성 (라디얼 0 = 흰색 → 풀 무지개)
+        /// </summary>
+        private AnimationClip CreateBacklightHueClip(GameObject avatar, List<string> targetPaths)
+        {
+            var clip = new AnimationClip();
+            var avatarTransform = avatar.transform;
+
+            const int steps = 24;
+            var rKeys = new List<Keyframe> { new Keyframe(0f, 1f) };
+            var gKeys = new List<Keyframe> { new Keyframe(0f, 1f) };
+            var bKeys = new List<Keyframe> { new Keyframe(0f, 1f) };
+
+            for (int i = 0; i <= steps; i++)
+            {
+                float t = (i + 1f) / (steps + 1f);
+                Color c = Color.HSVToRGB((float)i / steps, 1f, 1f);
+                rKeys.Add(new Keyframe(t, c.r));
+                gKeys.Add(new Keyframe(t, c.g));
+                bKeys.Add(new Keyframe(t, c.b));
+            }
+
+            var rCurve = LinearCurve(rKeys.ToArray());
+            var gCurve = LinearCurve(gKeys.ToArray());
+            var bCurve = LinearCurve(bKeys.ToArray());
+
+            foreach (var targetPath in targetPaths)
+            {
+                var targetTransform = avatarTransform.Find(targetPath);
+                if (targetTransform == null) continue;
+
+                System.Type rendererType = null;
+                if (targetTransform.GetComponent<SkinnedMeshRenderer>() != null)
+                    rendererType = typeof(SkinnedMeshRenderer);
+                else if (targetTransform.GetComponent<MeshRenderer>() != null)
+                    rendererType = typeof(MeshRenderer);
+
+                if (rendererType == null) continue;
+
+                AnimationUtility.SetEditorCurve(clip, new EditorCurveBinding { type = rendererType, path = targetPath, propertyName = $"{PROP_BACK_LIGHT_COLOR}.r" }, rCurve);
+                AnimationUtility.SetEditorCurve(clip, new EditorCurveBinding { type = rendererType, path = targetPath, propertyName = $"{PROP_BACK_LIGHT_COLOR}.g" }, gCurve);
+                AnimationUtility.SetEditorCurve(clip, new EditorCurveBinding { type = rendererType, path = targetPath, propertyName = $"{PROP_BACK_LIGHT_COLOR}.b" }, bCurve);
+            }
+
+            return clip;
+        }
+
+        private static AnimationCurve LinearCurve(Keyframe[] keys)
+        {
+            var curve = new AnimationCurve(keys);
+            for (int i = 0; i < curve.length; i++)
+            {
+                AnimationUtility.SetKeyLeftTangentMode(curve, i, AnimationUtility.TangentMode.Linear);
+                AnimationUtility.SetKeyRightTangentMode(curve, i, AnimationUtility.TangentMode.Linear);
+            }
+            return curve;
+        }
+
+        private void SetDynamicCurve(AnimationClip clip, System.Type rendererType, string path, string propertyName, float startValue, float endValue)
+        {
+            AnimationUtility.SetEditorCurve(clip, new EditorCurveBinding
+            {
+                type = rendererType,
+                path = path,
+                propertyName = propertyName
+            }, new AnimationCurve(new Keyframe(0f, startValue), new Keyframe(1f, endValue)));
+        }
+
+        private void SetConstantCurve(AnimationClip clip, System.Type rendererType, string path, string propertyName, float value)
+        {
+            SetDynamicCurve(clip, rendererType, path, propertyName, value, value);
+        }
+
         /// <summary>
         /// Shadow 클립 생성 (오버라이드 지원)
         /// </summary>
@@ -350,50 +492,6 @@ namespace Brightness.Utility
                         type = rendererType,
                         path = targetPath,
                         propertyName = PROP_SHADOW
-                    };
-                    AnimationUtility.SetEditorCurve(clip, binding, curve);
-                }
-            }
-
-            return clip;
-        }
-
-        /// <summary>
-        /// 고정값 애니메이션 클립 생성 (BackLight용)
-        /// </summary>
-        private AnimationClip CreateFixedValueClip(
-            GameObject avatar,
-            List<string> targetPaths,
-            string propertyName,
-            float value)
-        {
-            var clip = new AnimationClip();
-            var avatarTransform = avatar.transform;
-
-            // 고정값 커브 (시작과 끝이 같은 값)
-            var curve = new AnimationCurve(
-                new Keyframe(0f, value),
-                new Keyframe(1f, value)
-            );
-
-            foreach (var targetPath in targetPaths)
-            {
-                var targetTransform = avatarTransform.Find(targetPath);
-                if (targetTransform == null) continue;
-
-                System.Type rendererType = null;
-                if (targetTransform.GetComponent<SkinnedMeshRenderer>() != null)
-                    rendererType = typeof(SkinnedMeshRenderer);
-                else if (targetTransform.GetComponent<MeshRenderer>() != null)
-                    rendererType = typeof(MeshRenderer);
-
-                if (rendererType != null)
-                {
-                    var binding = new EditorCurveBinding
-                    {
-                        type = rendererType,
-                        path = targetPath,
-                        propertyName = propertyName
                     };
                     AnimationUtility.SetEditorCurve(clip, binding, curve);
                 }
@@ -457,7 +555,48 @@ namespace Brightness.Utility
             newController.layers = layersToKeep.ToArray();
             RemoveUnusedParameters(newController, featureFlags);
 
+            if (component.enableBackLight && component.enableBackLightColorChange && clipSet.BackLightHue != null)
+                AddRadialLayer(newController, "BackLightHue", clipSet.BackLightHue, BrightnessConstants.Parameters.BACK_LIGHT_HUE);
+
             return newController;
+        }
+
+        /// <summary>
+        /// 라디얼(Motion Time) 레이어를 코드로 생성해 컨트롤러에 추가
+        /// </summary>
+        private void AddRadialLayer(AnimatorController controller, string layerName, AnimationClip clip, string parameterName)
+        {
+            bool hasParam = false;
+            foreach (var p in controller.parameters)
+            {
+                if (p.name == parameterName) { hasParam = true; break; }
+            }
+            if (!hasParam)
+                controller.AddParameter(parameterName, AnimatorControllerParameterType.Float);
+
+            var stateMachine = new AnimatorStateMachine
+            {
+                name = layerName,
+                hideFlags = HideFlags.HideInHierarchy
+            };
+
+            var state = stateMachine.AddState(layerName);
+            state.motion = clip;
+            state.writeDefaultValues = true;
+            state.speedParameterActive = false;
+            state.timeParameterActive = true;
+            state.timeParameter = parameterName;
+
+            var layers = new List<AnimatorControllerLayer>(controller.layers)
+            {
+                new AnimatorControllerLayer
+                {
+                    name = layerName,
+                    defaultWeight = 1f,
+                    stateMachine = stateMachine
+                }
+            };
+            controller.layers = layers.ToArray();
         }
 
         private void ApplyStateMotion(AnimatorStateMachine sm, string stateName, AnimationClip clip)
@@ -519,6 +658,15 @@ namespace Brightness.Utility
                 configs.Add(CreateFloatParam(BrightnessConstants.Parameters.SHADOW));
             if (component.enableBackLight)
                 configs.Add(CreateFloatParam(BrightnessConstants.Parameters.BACK_LIGHT));
+            if (component.enableBackLight && component.enableBackLightColorChange)
+                configs.Add(new ParameterConfig
+                {
+                    nameOrPrefix = BrightnessConstants.Parameters.BACK_LIGHT_HUE,
+                    syncType = ParameterSyncType.Float,
+                    saved = true,
+                    defaultValue = 0f,
+                    hasExplicitDefaultValue = true
+                });
             if (component.enableShadowXAngle || component.enableShadowYAngle)
                 configs.Add(CreateBoolParam(BrightnessConstants.Parameters.TOGGLE_ANGLE));
             if (component.enableShadowXAngle)
@@ -541,6 +689,8 @@ namespace Brightness.Utility
                 subMenu.controls.Add(CreateRadialControl("Shadow", BrightnessConstants.Parameters.SHADOW));
             if (component.enableBackLight)
                 subMenu.controls.Add(CreateRadialControl("Back Light", BrightnessConstants.Parameters.BACK_LIGHT));
+            if (component.enableBackLight && component.enableBackLightColorChange)
+                subMenu.controls.Add(CreateRadialControl("Back Light Color", BrightnessConstants.Parameters.BACK_LIGHT_HUE));
             if (component.enableShadowXAngle || component.enableShadowYAngle)
                 subMenu.controls.Add(CreateToggleControl("Toggle Angle", BrightnessConstants.Parameters.TOGGLE_ANGLE));
             if (component.enableShadowXAngle)

@@ -1,20 +1,24 @@
 {
     "name": "com.sodanen.sodanenlighteditor",
-    "displayName": "SodanenLightEditor",
-    "version": "1.0.11",
+    "displayName": "Sodanen Light Control",
+    "version": "1.1.0",
     "author": {
         "name": "Sodanen",
         "url": "https://github.com/VRSoda"
     },
     "unity": "2022.3",
-    "description": "Sodanen Light Editor for VRChat Avatars.",
+    "description": "Sodanen Light Control component for VRChat avatars.",
+    "vpmDependencies": {
+        "nadena.dev.modular-avatar": ">=1.8.0",
+        "nadena.dev.ndmf": ">=1.4.0"
+    },
     "url": "https://github.com/VRSoda/Sodanen_Light_Editor.git",
     "keywords": [
         "vrchat",
         "avatar",
         "light",
         "brightness",
-        "editor"
+        "control"
     ],
     "license": "MIT",
     "repository": {
